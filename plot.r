@@ -48,7 +48,10 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     
     if(!exists(gsom_object$training)) stop("Trained gsom model expected, but obtained different data structure.")
     
-    stop("Missing Feature")
+    if(main == "") main <- "Training Progress"
+    
+    plot(x=gsom_model$training$iteration, y=gsom_model$training$meandist, col=gsom_model$training$training_stage+1, type="l",
+         main=main, xlab="Number of iterations", ylab="Mean Distance to Unit")
     
   } else if(type = "property") {
     
