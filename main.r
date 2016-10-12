@@ -9,6 +9,7 @@
 source("map.r")
 source("summary.r")
 source("plot.r")
+source("train.r")
 
 
 

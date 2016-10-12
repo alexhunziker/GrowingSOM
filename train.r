@@ -6,13 +6,13 @@
 # The Functions in this File are required in order to train the gsom model.
 # gsom.train() is the main function, which should be called by the user.
 
-gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, rep=50){
+gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, alpha, ...){
   
   df <- gsom.normalize(data)
   gsom_model <- gsom.init(df, spreadFactor)
-  gsom_model <- gsom.grow(gsom_model, df, rep)
+  gsom_model <- gsom.grow(gsom_model, df, iterations)
   
-  stop("Missing feature.")
+  warning("Missing feature.")
   
   return(gsom_model)
   

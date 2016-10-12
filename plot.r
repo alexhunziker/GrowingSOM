@@ -27,7 +27,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
          pch=16, cex=3, col=grey((gsom_object$nodes$freq/max(gsom_object$nodes$freq))^2)
     )
     
-  }else if(type = "dist"){
+  }else if(type == "dist"){
     
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
@@ -35,7 +35,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
          pch=16, cex=3, col=grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2)
     )
     
-  } else if(type = "dist_neighbours") {
+  } else if(type == "dist_neighbours") {
     
     stop("Missing Feature. Sorry...")
     plot(gsom_object$nodes$position$x, 
@@ -44,7 +44,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
          pch=16, cex=3, col=grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2)
     )
     
-  } else if(type = "training") {
+  } else if(type == "training") {
     
     if(!exists(gsom_object$training)) stop("Trained gsom model expected, but obtained different data structure.")
     
@@ -53,7 +53,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     plot(x=gsom_model$training$iteration, y=gsom_model$training$meandist, col=gsom_model$training$training_stage+1, type="l",
          main=main, xlab="Number of iterations", ylab="Mean Distance to Unit")
     
-  } else if(type = "property") {
+  } else if(type == "property") {
     
     if(any(dim > ncol(gsom_object$nodes$weight))) stop("Invalid value for parameter dim.")
     if(dim == 0) dim <- c(1:ncol(gsom_object$nodes$weight))
