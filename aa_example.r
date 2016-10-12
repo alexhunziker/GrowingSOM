@@ -17,7 +17,7 @@ traindata <- traindata[1:1200,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- gsom.train(traindata, 
-                         keepdata = TRUE, iterations = 30, 
+                         keepdata = TRUE, iterations = 5, 
                          spreadFactor = 0.5, alpha = 0.5)
 
 # Map data

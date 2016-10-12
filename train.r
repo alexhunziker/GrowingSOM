@@ -10,9 +10,9 @@ gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, al
   
   # Normalizing the training or testdata (min/max) in order to balance the impact
   # of the different properties of the dataframe
-  min <- apply(df, 2, function(x){min(x)})
-  max <- apply(df, 2, function(x){max(x)})
-  df <- t(apply(df, 1, function(x){(x-min)/(max-min)}))
+  min <- apply(data, 2, function(x){min(x)})
+  max <- apply(data, 2, function(x){max(x)})
+  df <- t(apply(data, 1, function(x){(x-min)/(max-min)}))
   
   gsom_model <- gsom.init(df, spreadFactor)
   gsom_model <- gsom.grow(gsom_model, df, iterations)
@@ -89,6 +89,7 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
       #Determine Winner
       minError=min(errors)
       errorsum = errorsum + minError
+      print(paste("Info:", minError))
       winner <- which(grepl(minError, errors))
       #fixes problem when two errors are the same for two nodes
       if(length(winner)>1) winner <- winner[1]
@@ -151,6 +152,7 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
       #Sys.sleep(0.1)
       
     }
+    print(errorsum)
     meandist <- errorsum/nrow(df)
     curr_train = c(iteration=i, training_stage=1, meandist=meandist, nodecount=nrow(gsom_model$nodes$position), nodegrow=nodegrow)
     print(curr_train)
@@ -254,4 +256,17 @@ gsom.newnode <- function(gsom_model, x, y){
   gsom_model$nodes$weight <- rbind(gsom_model$nodes$weight, nweight)
   
   return(gsom_model)
+}
+
+# Function for debugging only. 
+# Can be used to plot the gsom frequency at any stage druring the training process.
+# All collumns of the dataframe are expected to contain numeric values.
+print_crude <- function(gsom_model_t){
+  plot(gsom_model_t$nodes$position$x, 
+       gsom_model_t$nodes$position$y, 
+       type="n", main="Training Plot (Frequency)", xlab="", ylab="", xaxt='n', yaxt='n',
+       pch=16, cex=3, col=gray(gsom_model_t$nodes$freq/max(gsom_model_t$nodes$freq)))
+  text(gsom_model_t$nodes$position$x, 
+       gsom_model_t$nodes$position$y, 
+       gsom_model_t$nodes$freq)
 }
