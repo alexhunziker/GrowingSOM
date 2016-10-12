@@ -46,7 +46,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     
   } else if(type == "training") {
     
-    if(!exists("gsom_object$training")) stop("Trained gsom model expected, but obtained different data structure.")
+    if(is.null(gsom_model[["training"]])) stop("Trained gsom model expected, but obtained different data structure.")
     
     if(main == "") main <- "Training Progress"
     
@@ -58,8 +58,9 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     if(any(dim > ncol(gsom_object$nodes$weight))) stop("Invalid value for parameter dim.")
     if(dim == 0) dim <- c(1:ncol(gsom_object$nodes$weight))
     
+    if(main == "") gennames = TRUE
     for(i in dim){ #should eventually be changed to colnames. For works there as well
-      if(main == "") main <- paste("Property Nr:", i)
+      if(exists("gennames")) main <- paste("Property Nr:", i)
       
       plot(gsom_object$nodes$position$x, 
            gsom_object$nodes$position$y, 

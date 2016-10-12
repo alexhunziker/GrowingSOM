@@ -17,13 +17,19 @@ traindata <- traindata[1:1200,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- gsom.train(traindata, 
-                         keepdata = FALSE, iterations = 10, 
+                         keepdata = TRUE, iterations = 30, 
                          spreadFactor = 0.5, alpha = 0.5)
 
 # Map data
 mapped_testdata <- gsom.map(testdf, gsom_model)
 
 # Plot
+gsom.plot(gsom_model)
+gsom.plot(gsom_model, type="property")
+gsom.plot(gsom_model, type="property", dim=8, main="Testplot")
+gsom.plot(gsom_model, type="training")
+
+
 
 # Summary
 gsom.summary(gsom_model)
