@@ -174,11 +174,71 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
   return(gsom_model)
 }
 
-gsom.smooth <- function(gsom_model, df, rep, i, alpha){
-  #Reduce learning rate
-  #fix starting neighbourhood
-  #Find Winner
-  #Adapt Weights
+gsom.smooth <- function(gsom_model, df, rep, k, alpha){
+  winner <- "Dummy"
+  total_iterations <- nrow(df)*rep
+
+  #Present Input
+  #Replace with c code for speed gains
+  for(i in k:rep){
+    
+    nodegrow <- 0
+    errorsum <- 0
+
+    gsom_model$nodes$freq <- rep(0, times=length(gsom_model$nodes$freq))
+    #gsom_model$nodes$error <- rep(0, times=length(gsom_model$nodes$error))
+    t1 <- Sys.time()
+    for(j in 1:nrow(df)){
+      #Set Learning Rate
+      #Recalculate Learning Rate
+      #Contradiction to Paper. Learning rate is as defined in kohonen package
+      learningRate <- (total_iterations-(i*j))/total_iterations * alpha
+      
+      #CalcErrorValues
+      errors <- sqrt(rowSums(sweep(gsom_model$nodes$weight, MARGIN = 2, df[j,], FUN="-")^2, dims=1))
+      
+      #Determine Winner
+      minError=min(errors)
+      errorsum = errorsum + minError
+      winner <- which(grepl(minError, errors))
+      #fixes problem when two errors are the same for two nodes
+      if(length(winner)>1) winner <- winner[1]
+      
+      #Increase Error Value of Winner
+      gsom_model$nodes$error[winner] <- gsom_model$nodes$error[winner] + minError
+      gsom_model$nodes$freq[winner] <- gsom_model$nodes$freq[winner] + 1
+      
+      #Adjust Weights of Neighbourhood
+      #Note: Just the direct neighbours are considered. The paper does not give information about the neighbourhood size used.
+      winner.x <- gsom_model$nodes$position[winner,'x']
+      winner.y <- gsom_model$nodes$position[winner,'y']
+      self <- winner
+      top <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y+1)
+      bottom <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y-1)
+      right <- which(gsom_model$nodes$position$x == winner.x+1 & gsom_model$nodes$position$y == winner.y)
+      left <- which(gsom_model$nodes$position$x == winner.x-1 & gsom_model$nodes$position$y == winner.y)
+      adjust <- c(self, top, bottom, left, right)
+      for(k in 1:length(adjust)){
+        gsom_model$nodes$weight[adjust[k],] <- gsom_model$nodes$weight[adjust[k],]+ (df[j,] - gsom_model$nodes$weight[adjust[k],]) * learningRate
+      }
+      
+      rm(self, top, bottom, left, right)
+      
+    }
+    
+    print(errorsum)
+    meandist <- errorsum/nrow(df)
+    curr_train = c(iteration=i, training_stage=2, meandist=meandist, nodecount=nrow(gsom_model$nodes$position), nodegrow=nodegrow)
+    print(curr_train)
+    gsom_model$training[nrow(gsom_model$training)+1,] <- curr_train
+    #gsom_model <- gsom.emptyremove(gsom_model) ???
+    t2 <- Sys.time()
+    print(t2-t1)
+    print_crude(gsom_model)
+  }
+  #Run until Growth is reduced to minimum level:
+  #Initialize new node weights
+  #Initialize learning rate
   return(gsom_model)
 }
 
