@@ -8,23 +8,26 @@
 
 gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, alpha, ...){
   
-  df <- gsom.normalize(data)
+  # Normalizing the training or testdata (min/max) in order to balance the impact
+  # of the different properties of the dataframe
+  min <- apply(df, 2, function(x){min(x)})
+  max <- apply(df, 2, function(x){max(x)})
+  df <- t(apply(df, 1, function(x){(x-min)/(max-min)}))
+  
   gsom_model <- gsom.init(df, spreadFactor)
   gsom_model <- gsom.grow(gsom_model, df, iterations)
+  
+  norm_param <- data.frame(min = min, max = max)
+  gsom_model[["norm_param"]] <- norm_param
+  
+  if(keepdata==TRUE){
+    gsom_model[["data"]] = data
+  }
   
   warning("Missing feature.")
   
   return(gsom_model)
   
-}
-
-# Normalizing the training or testdata (min/max) in order to balance the impact
-# of the different properties of the dataframe
-gsom.normalize <- function(df){
-  min <- apply(df, 2, function(x){min(x)})
-  max <- apply(df, 2, function(x){max(x)})
-  df <- t(apply(df, 1, function(x){(x-min)/(max-min)}))
-  return(df)
 }
 
 # Gnenerate the basic data structure for the GSOM model. 
@@ -50,7 +53,7 @@ gsom.init <- function(df, spreadFactor){
   )
   herr = 0
   GT = -ncol(df) * log(spreadFactor)
-  gsom_net <- list(nodes = nodes, training = training, herr = herr, GT = GT)
+  gsom_net <- list(nodes = nodes, training = training, herr = herr, GT = GT, norm_param=0)
   #Calculate Growth Threshhold
   return(gsom_net)
 }
