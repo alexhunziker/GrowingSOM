@@ -17,7 +17,7 @@
 
 gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
   
-  if(!exists(gsom_object)) stop("GSOM object (trained model or mapped data) has to be provided.")
+  if(!exists("gsom_object")) stop("GSOM object (trained model or mapped data) has to be provided.")
   
   if(type == "count"){
     
@@ -46,7 +46,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     
   } else if(type == "training") {
     
-    if(!exists(gsom_object$training)) stop("Trained gsom model expected, but obtained different data structure.")
+    if(!exists("gsom_object$training")) stop("Trained gsom model expected, but obtained different data structure.")
     
     if(main == "") main <- "Training Progress"
     
