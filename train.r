@@ -73,6 +73,7 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
     
     nodegrow <- 0
     errorsum <- 0
+    learningRate <- 0.8
     
     gsom_model$nodes$freq <- rep(0, times=length(gsom_model$nodes$freq))
     #gsom_model$nodes$error <- rep(0, times=length(gsom_model$nodes$error))
@@ -81,7 +82,8 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
       #Set Learning Rate
       #Recalculate Learning Rate
       #Contradiction to Paper. Learning rate is as defined in kohonen package
-      learningRate <- (total_iterations-(i*j))/total_iterations * 1-(3.8/nrow(gsom_model$nodes$weight)) * alpha
+      #learningRate <- (total_iterations-(i*j))/total_iterations * 1-(3.8/nrow(gsom_model$nodes$weight)) * alpha
+      learningRate <- alpha * 1-(3.8/nrow(gsom_model$nodes$weight)) * learningRate
       
       #CalcErrorValues
       errors <- sqrt(rowSums(sweep(gsom_model$nodes$weight, MARGIN = 2, df[j,], FUN="-")^2, dims=1))
@@ -89,7 +91,6 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
       #Determine Winner
       minError=min(errors)
       errorsum = errorsum + minError
-      print(paste("Info:", minError))
       winner <- which(grepl(minError, errors))
       #fixes problem when two errors are the same for two nodes
       if(length(winner)>1) winner <- winner[1]
@@ -142,6 +143,7 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
           if(length(left)==0) gsom_model <- gsom.newnode(gsom_model, winner.x-1, winner.y)
           #Not clearly mentioned in the paper
           gsom_model$nodes$error[self]=0
+          learningRate <- 0.8
         }
         #Distribute Error
         
@@ -161,18 +163,23 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
     t2 <- Sys.time()
     print(t2-t1)
     print_crude(gsom_model)
+    #Arbitrary!
+    if(gsom_model$training$nodecount[i] <= gsom_model$training$nodecount[i-5] && i > 5) break
   }
+  print("GOTO: STAGE 2")
+  gsom_model <- gsom.smooth(gsom_model, df, rep, i, alpha)
   #Run until Growth is reduced to minimum level:
   #Initialize new node weights
   #Initialize learning rate
   return(gsom_model)
 }
 
-gsom.smooth <- function(...){
+gsom.smooth <- function(gsom_model, df, rep, i, alpha){
   #Reduce learning rate
   #fix starting neighbourhood
   #Find Winner
   #Adapt Weights
+  return(gsom_model)
 }
 
 # Removes nodes, that were never marked as winners. These nodes are irrelevant as no
