@@ -6,6 +6,8 @@
 
 # Loads all functionality for the GSOM
 
+library(plotrix)
+
 source("map.r")
 source("summary.r")
 source("plot.r")

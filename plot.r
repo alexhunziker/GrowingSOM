@@ -24,7 +24,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
          type="p", main=paste("Density"), xlab="", ylab="", xaxt='n', yaxt='n',
-         pch=16, cex=3, col=grey((gsom_object$nodes$freq/max(gsom_object$nodes$freq))^2)
+         pch=16, cex=3, col=color.scale(gsom_object$nodes$freq/max(gsom_object$nodes$freq),c(0,1,1),c(1,1,0),0)
     )
     
   }else if(type == "dist"){
@@ -69,7 +69,7 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
       plot(gsom_object$nodes$position$x, 
            gsom_object$nodes$position$y, 
            type="p", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
-           pch=16, cex=3, col=gray((gsom_object$nodes$weight[,i]/max(gsom_object$nodes$weight[,i]))^2)
+           pch=16, cex=3, col=color.scale((gsom_object$nodes$weight[,i]/max(gsom_object$nodes$weight[,i])),c(0.3,0.9),c(0,0.95),c(0.3,0.95))
       )
       
     }
