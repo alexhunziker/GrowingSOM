@@ -46,12 +46,16 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     
   } else if(type == "training") {
     
-    if(is.null(gsom_model[["training"]])) stop("Trained gsom model expected, but obtained different data structure.")
+    if(is.null(gsom_object[["training"]])) stop("Trained gsom model expected, but obtained different data structure.")
     
     if(main == "") main <- "Training Progress"
     
-    plot(x=gsom_model$training$iteration, y=gsom_model$training$meandist, col=gsom_model$training$training_stage+1, type="l",
-         main=main, xlab="Number of iterations", ylab="Mean Distance to Unit")
+    plot(x=gsom_object$training$iteration[gsom_object$training$training_stage==1], 
+         y=gsom_object$training$meandist[gsom_object$training$training_stage==1], col=2, type="l",
+         main=main, xlab="Number of iterations", ylab="Mean Distance to Unit", xlim = c(0, length(gsom_object$training$iteration)),
+         ylim = c(min(gsom_object$training$meandist), max(gsom_object$training$meandist)))
+    points(x=gsom_object$training$iteration[gsom_object$training$training_stage==2], 
+         y=gsom_object$training$meandist[gsom_object$training$training_stage==2], col=3, type="l")
     
   } else if(type == "property") {
     
