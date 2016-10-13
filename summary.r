@@ -21,7 +21,7 @@ gsom.summary <- function(gsom_model){
   iterations <- nrow(gsom_model$training)
   distance <- gsom_model$training$meandist[iterations]
   
-  if(is.null(gsom_model[["data"]])) storstat = "is not"
+  if(is.null(gsom_model[["data"]])) sorstat = "is not"
   else sorstat = "is"
   
   # Print
