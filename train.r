@@ -83,7 +83,7 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
       #Recalculate Learning Rate
       #Contradiction to Paper. Learning rate is as defined in kohonen package
       #learningRate <- (total_iterations-(i*j))/total_iterations * 1-(3.8/nrow(gsom_model$nodes$weight)) * alpha
-      learningRate <- alpha * 1-(3.8/nrow(gsom_model$nodes$weight)) * learningRate
+      learningRate <- alpha * (1-(3.8/nrow(gsom_model$nodes$weight))) * learningRate
       
       #CalcErrorValues
       errors <- sqrt(rowSums(sweep(gsom_model$nodes$weight, MARGIN = 2, df[j,], FUN="-")^2, dims=1))
@@ -103,12 +103,7 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
       #Note: Just the direct neighbours are considered. The paper does not give information about the neighbourhood size used.
       winner.x <- gsom_model$nodes$position[winner,'x']
       winner.y <- gsom_model$nodes$position[winner,'y']
-      self <- winner
-      top <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y+1)
-      bottom <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y-1)
-      right <- which(gsom_model$nodes$position$x == winner.x+1 & gsom_model$nodes$position$y == winner.y)
-      left <- which(gsom_model$nodes$position$x == winner.x-1 & gsom_model$nodes$position$y == winner.y)
-      adjust <- c(self, top, bottom, left, right)
+      adjust <- gsom.get_neighours(gsom_model, winner.x, winner.y)
       for(k in 1:length(adjust)){
         gsom_model$nodes$weight[adjust[k],] <- gsom_model$nodes$weight[adjust[k],]+ (df[j,] - gsom_model$nodes$weight[adjust[k],]) * learningRate
       }
@@ -121,14 +116,10 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
         gsom_model$herr <- 0
         if(length(adjust)>4){
           #Not a boundry node -> Spread it.
-          gsom_model$nodes$error[self] = gsom_model$GT / 2
+          gsom_model$nodes$error[adjust["self"]] = gsom_model$GT / 2
           #Note: This is ugly, since growth condidion is only checked, once the following nodes are winners again.
           #Also we are checking the topology once again...
-          top <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y+1)
-          bottom <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y-1)
-          right <- which(gsom_model$nodes$position$x == winner.x+1 & gsom_model$nodes$position$y == winner.y)
-          left <- which(gsom_model$nodes$position$x == winner.x-1 & gsom_model$nodes$position$y == winner.y)
-          adjust <- c(self, top, bottom, left, right)
+          adjust <- gsom.get_neighours(gsom_model, winner.x, winner.y)
           for(m in 1:4){
             #The paper suggests values for gamma between 0 and 1
             gam <- 0.5
@@ -137,22 +128,18 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
         } else {
           #Boundry node -> Grow net.
           nodegrow = nodegrow + 1
-          if(length(top)==0) gsom_model <- gsom.newnode(gsom_model, winner.x, winner.y+1)
-          if(length(bottom)==0) gsom_model <- gsom.newnode(gsom_model, winner.x, winner.y-1)
-          if(length(right)==0) gsom_model <- gsom.newnode(gsom_model, winner.x+1, winner.y)
-          if(length(left)==0) gsom_model <- gsom.newnode(gsom_model, winner.x-1, winner.y)
+          if(is.na(adjust["top"])) gsom_model <- gsom.newnode(gsom_model, winner.x, winner.y+1)
+          if(is.na(adjust["bottom"])) gsom_model <- gsom.newnode(gsom_model, winner.x, winner.y-1)
+          if(is.na(adjust["right"])) gsom_model <- gsom.newnode(gsom_model, winner.x+1, winner.y)
+          if(is.na(adjust["left"])) gsom_model <- gsom.newnode(gsom_model, winner.x-1, winner.y)
           #Not clearly mentioned in the paper
-          gsom_model$nodes$error[self]=0
+          gsom_model$nodes$error[adjust["self"]]=0
           learningRate <- 0.8
         }
         #Distribute Error
         
       }
-      
-      rm(self, top, bottom, left, right)
-      #print_crude(gsom_model)
-      #Sys.sleep(0.1)
-      
+
     }
     print(errorsum)
     meandist <- errorsum/nrow(df)
@@ -166,11 +153,10 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
     #Arbitrary!
     if(gsom_model$training$nodecount[i] <= gsom_model$training$nodecount[i-5] && i > 5) break
   }
+  
   print("GOTO: STAGE 2")
   gsom_model <- gsom.smooth(gsom_model, df, rep, i, alpha)
-  #Run until Growth is reduced to minimum level:
-  #Initialize new node weights
-  #Initialize learning rate
+  
   return(gsom_model)
 }
 
@@ -212,17 +198,15 @@ gsom.smooth <- function(gsom_model, df, rep, k, alpha){
       #Note: Just the direct neighbours are considered. The paper does not give information about the neighbourhood size used.
       winner.x <- gsom_model$nodes$position[winner,'x']
       winner.y <- gsom_model$nodes$position[winner,'y']
-      self <- winner
-      top <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y+1)
-      bottom <- which(gsom_model$nodes$position$x == winner.x & gsom_model$nodes$position$y == winner.y-1)
-      right <- which(gsom_model$nodes$position$x == winner.x+1 & gsom_model$nodes$position$y == winner.y)
-      left <- which(gsom_model$nodes$position$x == winner.x-1 & gsom_model$nodes$position$y == winner.y)
-      adjust <- c(self, top, bottom, left, right)
-      for(k in 1:length(adjust)){
-        gsom_model$nodes$weight[adjust[k],] <- gsom_model$nodes$weight[adjust[k],]+ (df[j,] - gsom_model$nodes$weight[adjust[k],]) * learningRate
+      adjust <- gsom.get_neighours(gsom_model, winner.x, winner.y)
+      for(k in adjust){
+       gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,]+ (df[j,] - gsom_model$nodes$weight[k,]) * learningRate
       }
-      
-      rm(self, top, bottom, left, right)
+      # gsom_model$nodes$weight[self,] <- gsom_model$nodes$weight[self,]+ (df[j,] - gsom_model$nodes$weight[self,]) * learningRate
+      # adjust <- c(top, bottom, left, right)
+      # for(k in adjust){
+      #   gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,]+ (df[j,] - gsom_model$nodes$weight[k,]) * learningRate * 0.5
+      # }
       
     }
     
@@ -236,10 +220,20 @@ gsom.smooth <- function(gsom_model, df, rep, k, alpha){
     print(t2-t1)
     print_crude(gsom_model)
   }
-  #Run until Growth is reduced to minimum level:
-  #Initialize new node weights
-  #Initialize learning rate
+
   return(gsom_model)
+}
+
+# Gets all the direct neighbours of a point with coord(x,y) and returns a vector with the rownumber of
+# the point and its neighbours
+gsom.get_neighours <- function(gsom_model, x, y){
+  self <- which(gsom_model$nodes$position$x == x & gsom_model$nodes$position$y == y)
+  top <- which(gsom_model$nodes$position$x == x & gsom_model$nodes$position$y == y+1)
+  bottom <- which(gsom_model$nodes$position$x == x & gsom_model$nodes$position$y == y-1)
+  right <- which(gsom_model$nodes$position$x == x+1 & gsom_model$nodes$position$y == y)
+  left <- which(gsom_model$nodes$position$x == x-1 & gsom_model$nodes$position$y == y)
+  neighbours <- c(self=self, top=top, bottom=bottom, left=left, right=right)
+  return(neighbours)
 }
 
 # Removes nodes, that were never marked as winners. These nodes are irrelevant as no
@@ -268,12 +262,9 @@ gsom.newnode <- function(gsom_model, x, y){
   gsom_model$nodes$freq <- c(gsom_model$nodes$freq, 0)
   
   #Get Topology
-  self <- which(gsom_model$nodes$position$x == x & gsom_model$nodes$position$y == y)
-  top <- which(gsom_model$nodes$position$x == x & gsom_model$nodes$position$y == y+1)
-  bottom <- which(gsom_model$nodes$position$x == x & gsom_model$nodes$position$y == y-1)
-  left <- which(gsom_model$nodes$position$x == x+1 & gsom_model$nodes$position$y == y)
-  right <- which(gsom_model$nodes$position$x == x-1 & gsom_model$nodes$position$y == y)
-  neighbours <- c(top, bottom, left, right)
+  neighbours <- gsom.get_neighours(gsom_model, x, y)
+  self <- neighbours[1]
+  neighbours <- na.omit(neighbours[2:5])
   
   #Weight calculation
   if(length(neighbours)>1){
