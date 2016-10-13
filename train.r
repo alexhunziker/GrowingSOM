@@ -24,8 +24,6 @@ gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, al
     gsom_model[["data"]] = data
   }
   
-  warning("Missing feature.")
-  
   return(gsom_model)
   
 }
@@ -115,32 +113,39 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
       if(gsom_model$herr > gsom_model$GT){
         gsom_model$herr <- 0
         if(length(adjust)>4){
+          
           #Not a boundry node -> Spread it.
           gsom_model$nodes$error[adjust["self"]] = gsom_model$GT / 2
+          
           #Note: This is ugly, since growth condidion is only checked, once the following nodes are winners again.
           #Also we are checking the topology once again...
           adjust <- gsom.get_neighours(gsom_model, winner.x, winner.y)
+          
           for(m in 1:4){
             #The paper suggests values for gamma between 0 and 1
             gam <- 0.5
             gsom_model$nodes$error[adjust[m]] = gsom_model$nodes$error[adjust[m]] * (1+gam)
           }
+          
         } else {
+          
           #Boundry node -> Grow net.
           nodegrow = nodegrow + 1
           if(is.na(adjust["top"])) gsom_model <- gsom.newnode(gsom_model, winner.x, winner.y+1)
           if(is.na(adjust["bottom"])) gsom_model <- gsom.newnode(gsom_model, winner.x, winner.y-1)
           if(is.na(adjust["right"])) gsom_model <- gsom.newnode(gsom_model, winner.x+1, winner.y)
           if(is.na(adjust["left"])) gsom_model <- gsom.newnode(gsom_model, winner.x-1, winner.y)
+          
           #Not clearly mentioned in the paper
           gsom_model$nodes$error[adjust["self"]]=0
           learningRate <- 0.8
+        
         }
-        #Distribute Error
         
       }
 
     }
+    
     print(errorsum)
     meandist <- errorsum/nrow(df)
     curr_train = c(iteration=i, training_stage=1, meandist=meandist, nodecount=nrow(gsom_model$nodes$position), nodegrow=nodegrow)
@@ -148,37 +153,38 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
     gsom_model$training[nrow(gsom_model$training)+1,] <- curr_train
     gsom_model <- gsom.emptyremove(gsom_model)
     t2 <- Sys.time()
-    print(t2-t1)
-    print_crude(gsom_model)
+    
     #Arbitrary!
-    if(gsom_model$training$nodecount[i] <= gsom_model$training$nodecount[i-5] && i > 5) break
+    if(gsom_model$training$nodecount[i] <= gsom_model$training$nodecount[i-4] && i > 4) break
   }
   
-  print("GOTO: STAGE 2")
+  gsom.plot(gsom_model, type="property")
   gsom_model <- gsom.smooth(gsom_model, df, rep, i, alpha)
   
   return(gsom_model)
 }
 
-gsom.smooth <- function(gsom_model, df, rep, k, alpha){
-  winner <- "Dummy"
+gsom.smooth <- function(gsom_model, df, rep, n, alpha){
+  
+  winner <- numeric()
   total_iterations <- nrow(df)*rep
+  nodegrow <- 0
 
   #Present Input
   #Replace with c code for speed gains
-  for(i in k:rep){
+  for(i in 1:rep){
     
-    nodegrow <- 0
     errorsum <- 0
-
     gsom_model$nodes$freq <- rep(0, times=length(gsom_model$nodes$freq))
-    #gsom_model$nodes$error <- rep(0, times=length(gsom_model$nodes$error))
+    gsom_model$nodes$error <- rep(0, times=length(gsom_model$nodes$error))
+    
     t1 <- Sys.time()
+    
     for(j in 1:nrow(df)){
       #Set Learning Rate
       #Recalculate Learning Rate
       #Contradiction to Paper. Learning rate is as defined in kohonen package
-      learningRate <- (total_iterations-(i*j))/total_iterations * alpha
+      learningRate <- (total_iterations-(i*j)) / total_iterations * alpha / 3
       
       #CalcErrorValues
       errors <- sqrt(rowSums(sweep(gsom_model$nodes$weight, MARGIN = 2, df[j,], FUN="-")^2, dims=1))
@@ -199,27 +205,32 @@ gsom.smooth <- function(gsom_model, df, rep, k, alpha){
       winner.x <- gsom_model$nodes$position[winner,'x']
       winner.y <- gsom_model$nodes$position[winner,'y']
       adjust <- gsom.get_neighours(gsom_model, winner.x, winner.y)
-      for(k in adjust){
-       gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,]+ (df[j,] - gsom_model$nodes$weight[k,]) * learningRate
-      }
-      # gsom_model$nodes$weight[self,] <- gsom_model$nodes$weight[self,]+ (df[j,] - gsom_model$nodes$weight[self,]) * learningRate
-      # adjust <- c(top, bottom, left, right)
       # for(k in adjust){
-      #   gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,]+ (df[j,] - gsom_model$nodes$weight[k,]) * learningRate * 0.5
+      #  gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,]+ (df[j,] - gsom_model$nodes$weight[k,]) * learningRate
       # }
+      #tempstor <- gsom_model$nodes$weight[adjust["self"],]
+      gsom_model$nodes$weight[adjust["self"],] <- gsom_model$nodes$weight[adjust["self"],]+ 
+        (df[j,] - gsom_model$nodes$weight[adjust["self"],]) * learningRate
+      #temp2 <- gsom_model$nodes$weight[adjust["self"],]
+      #adjust = adjust[2:length(adjust)]
+      #adjust <- na.omit(adjust)
+      #for(k in adjust){
+      #  gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,] + (df[j,] - gsom_model$nodes$weight[k,]) * learningRate * 0.5
+      #}
       
     }
     
     print(errorsum)
     meandist <- errorsum/nrow(df)
-    curr_train = c(iteration=i, training_stage=2, meandist=meandist, nodecount=nrow(gsom_model$nodes$position), nodegrow=nodegrow)
+    curr_train = c(iteration=i+n, training_stage=2, meandist=meandist, nodecount=nrow(gsom_model$nodes$position), nodegrow=nodegrow)
     print(curr_train)
     gsom_model$training[nrow(gsom_model$training)+1,] <- curr_train
-    #gsom_model <- gsom.emptyremove(gsom_model) ???
     t2 <- Sys.time()
     print(t2-t1)
-    print_crude(gsom_model)
   }
+  
+  gsom_model <- gsom.emptyremove(gsom_model)
+  gsom.plot(gsom_model, type="property")
 
   return(gsom_model)
 }
