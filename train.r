@@ -146,13 +146,14 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
 
     }
     
-    print(errorsum)
     meandist <- errorsum/nrow(df)
     curr_train = c(iteration=i, training_stage=1, meandist=meandist, nodecount=nrow(gsom_model$nodes$position), nodegrow=nodegrow)
     print(curr_train)
     gsom_model$training[nrow(gsom_model$training)+1,] <- curr_train
     gsom_model <- gsom.emptyremove(gsom_model)
     t2 <- Sys.time()
+    print(t2)
+    print_crude(gsom_model)
     
     #Arbitrary!
     if(gsom_model$training$nodecount[i] <= gsom_model$training$nodecount[i-4] && i > 4) break
@@ -220,7 +221,6 @@ gsom.smooth <- function(gsom_model, df, rep, n, alpha){
       
     }
     
-    print(errorsum)
     meandist <- errorsum/nrow(df)
     curr_train = c(iteration=i+n, training_stage=2, meandist=meandist, nodecount=nrow(gsom_model$nodes$position), nodegrow=nodegrow)
     print(curr_train)

@@ -13,12 +13,12 @@ source("main.r")
 # Load Data
 load("Q:/Abteilungsprojekte/eng/SWWData/Alex/Validation/SBR_raw.RData")
 testdf <- testdata$n_07_06[1:2000,3:ncol(testdata$n_07_06)]
-traindata <- traindata[1:1000,3:ncol(traindata)]
+traindata <- traindata[500:1000,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- gsom.train(traindata, 
-                         keepdata = FALSE, iterations = 40, 
-                         spreadFactor = 0.5, alpha = 0.5)
+                         keepdata = FALSE, iterations = 15, 
+                         spreadFactor = 0.3, alpha = 0.5)
 
 # Map data
 mapped_testdata <- gsom.map(testdf, gsom_model)
