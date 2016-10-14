@@ -25,19 +25,26 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
          type="p", main=paste("Density (Observations per unit)"), xlab="", ylab="", xaxt='n', yaxt='n',
-         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$freq,c(0,1,1),c(1,1,0), 0)
+         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$freq,c(0.9,0),c(0.9,0),c(0.9,1))
     )
     image.plot(legend.only=TRUE, zlim=c(min(gsom_object$nodes$freq),max(gsom_object$nodes$freq)),
-               col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),c(0,1,1),c(1,1,0),0))
+               col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),c(0.9,0),c(0.9,0),c(0.9,1)))
     par(mar=c(5.1,4.1,4.1,2.1))
     
   }else if(type == "dist"){
     
+    par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="p", main=paste("Density"), xlab="", ylab="", xaxt='n', yaxt='n',
-         pch=16, cex=3, col=grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2)
+         type="p", main=paste("Avgerage Euclidan Distance From BMU"), xlab="", ylab="", xaxt='n', yaxt='n',
+         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$error,c(0,1,1),c(1,1,0), 0)
     )
+    minattr <- min(gsom_object$nodes$error)
+    maxattr <- max(gsom_object$nodes$error)
+    scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
+    image.plot(legend.only=TRUE, zlim=c(min(gsom_object$nodes$error),max(gsom_object$nodes$error)),
+               col=plotrix::color.scale(scale,c(0,1,1),c(1,1,0),0))
+    par(mar=c(5.1,4.1,4.1,2.1))
     
   } else if(type == "dist_neighbours") {
     
@@ -60,6 +67,8 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
          ylim = c(min(gsom_object$training$meandist), max(gsom_object$training$meandist)))
     points(x=gsom_object$training$iteration[gsom_object$training$training_stage==2], 
          y=gsom_object$training$meandist[gsom_object$training$training_stage==2], col=3, type="l")
+    legend(length(gsom_object$training$meandist)*0.65, max(gsom_object$training$meandist), 
+           legend=c("Growing Phase", "Smoothing Phase"), col=c(2, 3), lty=1, cex=0.8, lwd=2)
     
   } else if(type == "property") {
     
