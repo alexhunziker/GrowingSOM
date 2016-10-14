@@ -21,11 +21,15 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
   
   if(type == "count"){
     
+    par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="p", main=paste("Density"), xlab="", ylab="", xaxt='n', yaxt='n',
-         pch=16, cex=3, col=color.scale(gsom_object$nodes$freq/max(gsom_object$nodes$freq),c(0,1,1),c(1,1,0),0)
+         type="p", main=paste("Density (Observations per unit)"), xlab="", ylab="", xaxt='n', yaxt='n',
+         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$freq,c(0,1,1),c(1,1,0), 0)
     )
+    image.plot(legend.only=TRUE, zlim=c(min(gsom_object$nodes$freq),max(gsom_object$nodes$freq)),
+               col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),c(0,1,1),c(1,1,0),0))
+    par(mar=c(5.1,4.1,4.1,2.1))
     
   }else if(type == "dist"){
     
@@ -59,20 +63,30 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     
   } else if(type == "property") {
     
+    par(mar=c(5.1,4.1,4.1,5.5))
     if(any(dim > ncol(gsom_object$nodes$weight))) stop("Invalid value for parameter dim.")
     if(dim == 0) dim <- c(1:ncol(gsom_object$nodes$weight))
     
     if(main == "") gennames = TRUE
     for(i in dim){ #should eventually be changed to colnames. For works there as well
+      
       if(exists("gennames")) main <- paste("Property Nr:", i)
+      
+      minattr <- gsom_object$norm_param[i,1]
+      maxattr <- gsom_object$norm_param[i,2]
+      scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
       
       plot(gsom_object$nodes$position$x, 
            gsom_object$nodes$position$y, 
            type="p", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
-           pch=16, cex=3, col=color.scale((gsom_object$nodes$weight[,i]/max(gsom_object$nodes$weight[,i])),c(0.3,0.9),c(0,0.95),c(0.3,0.95))
+           pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$weight[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95))
       )
+      image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
+                 col=plotrix::color.scale(scale,c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
       
     }
+    
+    par(mar=c(5.1,4.1,4.1,2.1))
     
   } else {
     
