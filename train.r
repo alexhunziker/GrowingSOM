@@ -159,7 +159,7 @@ gsom.grow <- function(gsom_model, df, rep=50, alpha = 0.5, ...){
     if(gsom_model$training$nodecount[i] <= gsom_model$training$nodecount[i-4] && i > 4) break
   }
   
-  gsom.plot(gsom_model, type="property")
+  #gsom.plot(gsom_model, type="property")
   gsom_model <- gsom.smooth(gsom_model, df, rep, i, alpha)
   
   return(gsom_model)
@@ -206,12 +206,17 @@ gsom.smooth <- function(gsom_model, df, rep, n, alpha){
       winner.x <- gsom_model$nodes$position[winner,'x']
       winner.y <- gsom_model$nodes$position[winner,'y']
       adjust <- gsom.get_neighours(gsom_model, winner.x, winner.y)
-      # for(k in adjust){
-      #  gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,]+ (df[j,] - gsom_model$nodes$weight[k,]) * learningRate
-      # }
+      if(i < rep/2){
+        for(k in adjust){
+          gsom_model$nodes$weight[k,] <- gsom_model$nodes$weight[k,]+ (df[j,] - gsom_model$nodes$weight[k,]) * learningRate
+        }
+      } else{
+        gsom_model$nodes$weight[adjust["self"],] <- gsom_model$nodes$weight[adjust["self"],]+ 
+          (df[j,] - gsom_model$nodes$weight[adjust["self"],]) * learningRate
+      }
       #tempstor <- gsom_model$nodes$weight[adjust["self"],]
-      gsom_model$nodes$weight[adjust["self"],] <- gsom_model$nodes$weight[adjust["self"],]+ 
-        (df[j,] - gsom_model$nodes$weight[adjust["self"],]) * learningRate
+      #gsom_model$nodes$weight[adjust["self"],] <- gsom_model$nodes$weight[adjust["self"],]+ 
+      #  (df[j,] - gsom_model$nodes$weight[adjust["self"],]) * learningRate
       #temp2 <- gsom_model$nodes$weight[adjust["self"],]
       #adjust = adjust[2:length(adjust)]
       #adjust <- na.omit(adjust)
@@ -229,8 +234,10 @@ gsom.smooth <- function(gsom_model, df, rep, n, alpha){
     print(t2-t1)
   }
   
+  gsom_model$nodes$error <- gsom_model$nodes$error / gsom_model$nodes$freq
+  
   gsom_model <- gsom.emptyremove(gsom_model)
-  gsom.plot(gsom_model, type="property")
+  #gsom.plot(gsom_model, type="property")
 
   return(gsom_model)
 }

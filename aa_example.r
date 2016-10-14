@@ -17,7 +17,7 @@ traindata <- traindata[500:1000,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- gsom.train(traindata, 
-                         keepdata = FALSE, iterations = 15, 
+                         keepdata = FALSE, iterations = 30, 
                          spreadFactor = 0.3, alpha = 0.5)
 
 # Map data
@@ -29,6 +29,7 @@ gsom.plot(gsom_model)
 gsom.plot(gsom_model, type="property")
 gsom.plot(gsom_model, type="property", dim=8, main="Testplot")
 gsom.plot(gsom_model, type="training")
+gsom.plot(gsom_model, type="dist")
 
 gsom.plot(mapped_testdata)
 print_crude(mapped_testdata)
