@@ -14,15 +14,16 @@ struct adjust{
 };
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf
-		Sint *plennd, Sint *plrinit, double *freq, double *alhpa, Sind *pdim){
+		Sint *plennd, Sint *plrinit, double *freq, double *alhpa, Sind *pdim, Sind *pgt){
 	
 	int winner, totiter;
 	int nodegrow, errorsum, x, tmp, dm;
 	int to, bo, le, ri;
-	int rep = prep, lendf = plendf, lrinit = plr, lennd = plennd, dim = pdim;
+	int rep = prep, lendf = plendf, lrinit = plr, lennd = plennd, dim = pdim, gt = pgt;
 	struct adjust *root, *tp, *current;
 	
 	root = (struct adjust *) malloc( sizeof(struct adjust) ); 
+	root -> next = NULL;
 	
 	totiter = rep * lendf;
 	
@@ -68,6 +69,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			}
 			
 			distnd[nearest] += dm;
+			errorsum += errorsum;
 			freq[nearest]++;
 			
 			radius = "MISSING FEATURE";
@@ -111,6 +113,29 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			}
 			
 			// Growth / Spreading
+			if(distnd[nearest] > gt){
+				current = root;
+				tmp = 0;
+				while(current -> adrate >= 1 - 2/5){
+					tmp ++;
+				}
+				if(tmp > 4){
+					distnd[nearest] = distnd[nearest] / 2;
+					for(l=1; l < 5; l++){
+						// Paper suggests values between 0 and 1
+						current = current -> next;
+						distnd[current -> nodeid] = distnd[current -> nodeid] * (1 + 0.5);
+					}
+				} else {
+					nodegrow += 1;
+					
+					//Growthcondition
+					
+					lr = lrinit;
+					dist[nearest] = 0;
+					
+				}
+			}
 			
 		}
 		
