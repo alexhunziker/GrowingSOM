@@ -4,6 +4,7 @@
 ////////////////////////////////////////
 
 #include <R.h>
+#include <unistd.h>
 
 #define EPS 1e-4                /* relative test of equality of distances */
 
@@ -13,26 +14,29 @@ struct adjust{
 	struct adjust *next;
 };
 
-void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf
-		Sint *plennd, Sint *plrinit, double *freq, double *alhpa, Sind *pdim, Sind *pgt){
+void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
+		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, Sint *pradius){
 	
-	int winner, totiter;
-	int nodegrow, errorsum, x, tmp, dm;
-	int to, bo, le, ri;
-	int rep = prep, lendf = plendf, lrinit = plr, lennd = plennd, dim = pdim, gt = pgt;
-	struct adjust *root, *tp, *current;
+	int nearest, totiter, nind;
+	double dist, tmp, dm, lr, errorsum;
+	int nodegrow, x;
+	int i, j, k, l, m;
+	int rep = *prep, lendf = *plendf, lrinit = *plrinit, lennd = *plennd, dim = *pdim, radius = *pradius;
+	struct adjust *root, *tp, *current, *tnode;
 	
 	root = (struct adjust *) malloc( sizeof(struct adjust) ); 
-	root -> next = NULL;
+	root -> next = (struct adjust *) malloc( sizeof(struct adjust) );
+	root -> next -> next = NULL;
+	root -> next -> nodeid = -1; 
 	
 	totiter = rep * lendf;
 	
 	// Loop over iterations of the input data
-	for(i = 1, i<=rep, i++){
+	for(i = 1; i<=rep; i++){
 		
 		// Reset Frequencies 
 		// In order to be able to delete unneeded nodes
-		for(j = 0, j<lennd, j++) freq[j] = 0;
+		for(j = 0; j<lennd; j++) freq[j] = 0;
 		
 		nodegrow = 0;
 		errorsum = 0;
@@ -40,72 +44,87 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		lr = lrinit;
 		
 		// Loop over number of observations
-		for(j = 0, j<lendf, j++){
+		for(j = 0; j<lendf; j++){
 			
-			x = (int)(lendf * unif_rand());
+			//x = (lendf*unif_rand());
+			x=4;
 			
-			lr = alpha * ( 1-( 3.8/lennd ) ) * lr;
+			lr = *alpha * ( 1-(3.8/lennd))*lr;
 			
 			// Find best matching node
 			nind = 0;
-			winner = -1;
-			dm = DOUBLE_XMAX
+			nearest = -1;
+			dm = 9999;
 			for (k = 0; k < lennd; k++) {
 				dist = 0.0;
 				for (l = 0; l < dim; l++) {
-					tmp = data[x + lendf*l] - weights[x + l*lennd];
+					tmp = df[x + lendf*l] - weights[k + l*lennd];
 					dist += tmp * tmp;
 				}
 
 				if (dist <= dm * (1 + EPS)) {
 					if (dist < dm * (1 - EPS)) {
 						nind = 0;
-						nearest = cd;
+						nearest = k;
 					} else {
-						if(++nind * unif_rand() < 1.0) nearest = cd;
+						if(++nind * unif_rand() < 1.0) nearest = k;
 					}
 					dm = dist;
 				}
 			}
 			
 			distnd[nearest] += dm;
-			errorsum += errorsum;
+			errorsum += dm;
 			freq[nearest]++;
-			
-			radius = "MISSING FEATURE";
+
+			//Detect Radius.
 			
 			// Find neighbourhood
-			for(k; k>0, k--){
+			root -> nodeid = nearest;
+			root -> adrate = 1;
+			for(k = radius; k>0; k--){
 				current = root;
+				if(root -> next == NULL) error("Error in Linked List");
+				
+				printf("Current: %d, %d\n", current -> nodeid, k);
 				while(current->next != NULL){
-					for(l=1; l<lennd; l++){
-						if(npos[l] == npos[current -> nodeid]+1 && npos[l+1] == npos[current -> nodeid+1] ||
-							npos[l] == npos[current -> nodeid]-1 && npos[l+1] == npos[current -> nodeid+1] ||
-							npos[l] == npos[current -> nodeid] && npos[l+1] == npos[current -> nodeid+1]+1 ||
-							npos[l] == npos[current -> nodeid] && npos[l+1] == npos[current -> nodeid+1]-1){
+					for(l=0; l<lennd; l++){
+						printf("hello\n");						
+						printf("nops(l) %f, (l+1) %f", npos[l], npos[l+lennd]);
+						if(npos[l] == npos[current -> nodeid]+1 && npos[l+lennd] == npos[current -> nodeid+lennd] ||
+							npos[l] == npos[current -> nodeid]-1 && npos[l+lennd] == npos[current -> nodeid+lennd] ||
+							npos[l] == npos[current -> nodeid] && npos[l+lennd] == npos[current -> nodeid+lennd]+1 ||
+							npos[l] == npos[current -> nodeid] && npos[l+lennd] == npos[current -> nodeid+lennd]-1){
 							
-							temp=0;
+							printf("Found a neighbour\n");							
+							tmp=0;
 							tp = root;
-							while(tp != NULL){
-								if(tp -> nodeid == l) temp = 1;
+							while(tp -> next != NULL){
+								if(tp -> nodeid == l) tmp = 1;
+								printf("Checked nodeid: %f, %d\n", tmp, tp -> nodeid);
 								tp = tp -> next;
 							}
-							if(temp == 0){
-								current -> next = (struct adjust *) malloc( sizeof(struct adjust) );
-								current -> nodeid = l;
-								current -> adrate = 1 - l/5;
-								current = current -> next;
+
+							if(tmp == 0){
+								tnode = (struct adjust *) malloc( sizeof(struct adjust) );
+								tnode -> next = root;
+								tnode -> nodeid = l;
+								tnode -> adrate = 1 - l/5;
+								root = tnode;
 							}
 						}
 					}
+					current = current -> next;
+					if(root -> next == NULL) error("Error in Linked List");
 				}
+				printf("Is.null");
 			}
 			
 			//Adjust neighbourhood
-			while(root -> next != NULL){
+			while(root -> next -> next != NULL){
 				for(k; k<dim; k++){
 					weights[nearest+ k*lennd] = weights[nearest+ k*lennd] + 
-						(data[x + k*lendf] - weights[nearest+ k*lennd]) * lr;
+						(df[x + k*lendf] - weights[nearest+ k*lennd]) * lr;
 				}
 				tp=root;
 				root = root -> next;
@@ -113,7 +132,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			}
 			
 			// Growth / Spreading
-			if(distnd[nearest] > gt){
+			if(distnd[nearest] > *gt){
 				current = root;
 				tmp = 0;
 				while(current -> adrate >= 1 - 2/5){
@@ -132,7 +151,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 					//Growthcondition
 					
 					lr = lrinit;
-					dist[nearest] = 0;
+					distnd[nearest] = 0;
 					
 				}
 			}
