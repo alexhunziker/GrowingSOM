@@ -17,11 +17,13 @@ struct adjust{
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
 		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, Sint *pradius){
 	
-	int nearest, totiter, nind;
+	int nearest, totiter, nind, phase, radius;
 	double dist, tmp, dm, lr, errorsum;
 	int nodegrow, x;
 	int i, j, k, l, m;
-	int rep = *prep, lendf = *plendf, lrinit = *plrinit, lennd = *plennd, dim = *pdim, radius = *pradius;
+	int ax[4] = {0, 0, 1, -1};
+	int ay[4] = {1, -1, 0, 0};
+	int rep = *prep, lendf = *plendf, lrinit = *plrinit, lennd = *plennd, dim = *pdim, initradius = *pradius;
 	struct adjust *root, *tp, *current, *tnode;
 	
 	root = (struct adjust *) malloc( sizeof(struct adjust) ); 
@@ -30,6 +32,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 	root -> next -> nodeid = -1; 
 	
 	totiter = rep * lendf;
+
+	phase = 1;
 	
 	// Loop over iterations of the input data
 	for(i = 1; i<=rep; i++){
@@ -78,6 +82,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			freq[nearest]++;
 
 			//Detect Radius.
+			if(phase == 1) radius = initradius;
+			else radius = initradius * ((rep - i) / rep) + 1;
 			
 			// Find neighbourhood
 			root -> nodeid = nearest;
@@ -89,7 +95,6 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				printf("Current: %d, %d\n", current -> nodeid, k);
 				while(current->next != NULL){
 					for(l=0; l<lennd; l++){
-						printf("hello\n");						
 						printf("nops(l) %f, (l+1) %f", npos[l], npos[l+lennd]);
 						if(npos[l] == npos[current -> nodeid]+1 && npos[l+lennd] == npos[current -> nodeid+lennd] ||
 							npos[l] == npos[current -> nodeid]-1 && npos[l+lennd] == npos[current -> nodeid+lennd] ||
@@ -101,7 +106,6 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 							tp = root;
 							while(tp -> next != NULL){
 								if(tp -> nodeid == l) tmp = 1;
-								printf("Checked nodeid: %f, %d\n", tmp, tp -> nodeid);
 								tp = tp -> next;
 							}
 
@@ -117,28 +121,32 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 					current = current -> next;
 					if(root -> next == NULL) error("Error in Linked List");
 				}
-				printf("Is.null");
+				printf("Is.null\n");
 			}
 			
 			//Adjust neighbourhood
-			while(root -> next -> next != NULL){
+			current = root;
+			while(current -> next -> next != NULL){
 				for(k; k<dim; k++){
-					weights[nearest+ k*lennd] = weights[nearest+ k*lennd] + 
-						(df[x + k*lendf] - weights[nearest+ k*lennd]) * lr;
+					weights[current -> nodeid + k*lennd] = weights[current -> nodeid+ k*lennd] + 
+						(df[x + k*lendf] - weights[current -> nodeid+ k*lennd]) * lr * current -> adrate;
 				}
-				tp=root;
-				root = root -> next;
-				free(tp);
+				current = current -> next;
 			}
 			
 			// Growth / Spreading
-			if(distnd[nearest] > *gt){
+			if(distnd[nearest] > *gt && phase == 1){
 				current = root;
 				tmp = 0;
-				while(current -> adrate >= 1 - 2/5){
-					tmp ++;
+				while(root -> next -> next != NULL){
+					if(root -> adrate >= 1 - 2/5) tmp ++;
+					tp=root;
+					root = root -> next;
+					free(tp);
 				}
-				if(tmp > 4){
+
+				if(tmp == 4){
+					printf("Dist\n");
 					distnd[nearest] = distnd[nearest] / 2;
 					for(l=1; l < 5; l++){
 						// Paper suggests values between 0 and 1
@@ -146,9 +154,21 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 						distnd[current -> nodeid] = distnd[current -> nodeid] * (1 + 0.5);
 					}
 				} else {
+					printf("Grow\n");
 					nodegrow += 1;
 					
 					//Growthcondition
+					for(l=0; l<4; l++){
+						/*tmp = 0;
+						for(m=0; m < lennd; m++){
+							if(npos[m] == npos[nearest + ax[l]] && npos[m + lennd] == npos[nearest + ay[l] + lennd]) tmp = 1;
+						}
+						if(tmp == 0){
+							lennd++;
+							npos[lennd-1] = nearest + ax[l];
+							npos[lennd*2 - 1] = nearest + ay[l];
+						}*/
+					}
 					
 					lr = lrinit;
 					distnd[nearest] = 0;
