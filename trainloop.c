@@ -14,7 +14,7 @@ struct adjust{
 	struct adjust *next;
 };
 
-struct *adjust get_neighbours(double *npos, struct adjust *origin);
+*struct adjust get_neighbours(double *npos, struct adjust *origin);
 void clear_ll(struct adjust *root);
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
@@ -109,7 +109,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				if(root -> next == NULL) error("Error in Linked List");
 
 				printf("Current: %d, %d\n", current -> nodeid, k);
-				while(current->next != NULL){
+				while(current -> next != NULL){
 					for(l=0; l<lennd; l++){
 						printf("nops(l) %f, (l+1) %f", npos[l], npos[l+lennd]);
 						if(npos[l] == npos[current -> nodeid]+1 && npos[l+lennd] == npos[current -> nodeid+lennd] ||
@@ -276,7 +276,7 @@ struct *adjust get_neighbours(double *npos, int lennd, struct adjust *origin, in
 				printf("Found a neighbour\n");
 
 				//Sort out nodes that are in the input LL
-				tmp=0;
+				exclude=0;
 				tmp = root;
 				while(tmp -> next != NULL){
 					if(tmp -> nodeid == l) exclude = 1;
