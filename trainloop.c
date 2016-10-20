@@ -5,6 +5,7 @@
 
 #include <R.h>
 #include <unistd.h>
+#include <math.h>
 
 #define EPS 1e-4                /* relative test of equality of distances */
 
@@ -211,7 +212,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								//Delete New Node from Neighbours of New Nodes neighbours
 								// & determine if case A applies.
 								hptr = nonneigh;
-								tmp = 0;
+								tmp = -1;
 								while(hptr != NULL){
 									if(hptr -> nodeid == nneigh -> nodeid){
 										hptr2 = hptr -> next;
@@ -219,37 +220,95 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 										hptr -> next = hptr2 -> next;
 										free(hptr2);
 									}
-									for(o=0; o < dim; o++){
-										if(npos[hptr -> nodeid] == npos[nearest + ax[o]*2] && npos[hptr -> nodeid + lennd] == npos[nearest + ay[o]*2 + lennd]) tmp = 1;
+									for(o=0; o < 4; o++){
+										if(npos[hptr -> nodeid] == npos[nearest] + ax[o]*2 && npos[hptr -> nodeid + lennd] == npos[nearest + lennd] + ay[o]*2 ) tmp = o;
 									}
 									hptr = hptr -> next;
 								}
 
-								if(tmp != 0){
+								w1 = nneigh -> nodeid;
+								if(tmp != -1){
 									//Case A
+									hptr = nonneigh;
+									for(o=0; o<tmp; o++){
+										hptr = hptr -> next;
+									}
+									w2 = hptr -> nodeid;
+									for(o=0; o < dim; o++){
+										if(weights[w1 + o*lennd] < weights[w2 + o*lennd]){
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+										}else{
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+										}
+									}
 
 								}else if(nonneigh == NULL){
 									//Case D
+									for(o=0; o<dim; o++){
+										min=infinity();
+										max=-infinity();
+										for(p=0; p<lennd; p++){
+											if(weights[p + o*lennd] > max) max = weights[p + o*lennd];
+											if(weights[p + o*lennd] < min) min = weights[p + o*lennd];
+										}
+										weights[lennd-1 + lennd*o] = (min + max) / 2;
+									}
 
 								}else{
-									//Case C
-								}
 
+									//Case C
+									w2 = nonneigh -> nodeid;
+									for(o=0, o < dim; o++){
+										if(weights[w1 + o*lennd] < weights[w2 + o*lennd]){
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+										}else{
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+										}
+									}
+								}
 								clear_ll(nonneigh);
 							}
-
 							clear_ll(nneigh);
-
 						}
 					}
 
 					lr = lrinit;
 					distnd[nearest] = 0;
-
 				}
 			}
 
 		}
+
+		//Update Training Progress
+		meandist = errorsum / lendf;
+		currtrain[i + 0*lentr] = i;
+		currtrain[i + 1*lentr] = phase;
+		currtrain[i + 2*lentr] = meandist;
+		currtrain[i + 3*lentr] = lennd;
+		currtrain[i + 4*lentr] = nodegrow;
+
+		//Remove Empty Units
+		while(j < lennd){
+			if(freq[j] > 0) j++;
+			else{
+				freq[j] = freq[lennd-1];
+				freq[lennd-1] = na();
+
+				npos[j] = npos[lennd-1];
+				npos[j + lennd] = npos[lennd-1 + lennd];
+				npos[lennd-1] = na();
+				npos[lennda-1 + lennd] = na();
+
+				for(k=0; k<dim; k++){
+					weights[j + k*lennd] = weights[lennd + k*lennd];
+					weights[lennd + k*lennd]; = na();
+				}
+
+				lennd--;
+			}
+		}
+
+		//Check if Phase should change
 
 	}
 }
