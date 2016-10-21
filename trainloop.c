@@ -15,32 +15,27 @@ struct adjust{
 	struct adjust *next;
 };
 
-*struct adjust get_neighbours(double *npos, struct adjust *origin);
+int ax[4] = {0, 0, 1, -1};
+int ay[4] = {1, -1, 0, 0};
+
+struct adjust *get_neighbours(double *npos, int lennd, struct adjust *origin, int adrate);
 void clear_ll(struct adjust *root);
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
-		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, Sint *pradius){
+		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, Sint *pradius,
+		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr){
 
-	//General Variables
 	int nearest, totiter, phase;
-
-	//Variables for Iterations
-	int i, j, k, l, m;
-
-	//Variables For Nodegrowth
-
-
-	//Variables From Pointers
+	int i, j, k, l, m, n, o, p;
+	int w1, w2;
+	double min, max;
+	double meandist;
+	struct adjust *nneigh, *nonneigh;
 	int rep = *prep, lendf = *plendf, lrinit = *plrinit, lennd = *plennd, dim = *pdim, initradius = *pradius;
-
-	//Variables Fror Neighbour Detection
-	int ax[4] = {0, 0, 1, -1};
-	int ay[4] = {1, -1, 0, 0};
-
+	int lentn = *plentn, lentd = *plentd, lentr = *plentr;
 	int nind, radius;
 	double dist, tmp, dm, lr, errorsum;
 	int nodegrow, x;
-
 	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2;
 
 	root = (struct adjust *) malloc( sizeof(struct adjust) );
@@ -79,7 +74,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			for (k = 0; k < lennd; k++) {
 				dist = 0.0;
 				for (l = 0; l < dim; l++) {
-					tmp = df[x + lendf*l] - weights[k + l*lennd];
+					tmp = df[x + lendf*l] - weights[k + l*lentn];
 					dist += tmp * tmp;
 				}
 
@@ -146,8 +141,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			current = root;
 			while(current -> next -> next != NULL){
 				for(k; k<dim; k++){
-					weights[current -> nodeid + k*lennd] = weights[current -> nodeid+ k*lennd] +
-						(df[x + k*lendf] - weights[current -> nodeid+ k*lennd]) * lr * current -> adrate;
+					weights[current -> nodeid + k*lentn] = weights[current -> nodeid+ k*lentn] +
+						(df[x + k*lendf] - weights[current -> nodeid+ k*lentn]) * lr * current -> adrate;
 				}
 				current = current -> next;
 			}
@@ -192,13 +187,13 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 							struct adjust *newnode;
 							newnode -> next = NULL;
 							newnode -> nodeid = m;
-							nneigh = get_neighbours(npos, lennd, newnode);
+							nneigh = get_neighbours(npos, lennd, newnode, 0);
 							clear_ll(newnode);
 
-							if(nneight -> next != NULL){
+							if(nneigh -> next != NULL){
 								//Case B
 								for(n=0; n<dim; n++){
-									nweight[n] = weights[npos[nneigh] + lennd*n] + weights[npos[nneigh + lennd] + lennd*n] / 2;
+									weights[lennd-1 + n*dim] = (weights[nneigh -> nodeid + n*dim] + weights[nneigh -> next -> nodeid + n*dim]) / 2;
 								}
 
 							} else{
@@ -206,7 +201,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								struct adjust *newnode_f;
 								newnode_f -> next = NULL;
 								newnode_f -> nodeid = nneigh -> nodeid;
-								nonneigh = get_neighbours(npos, lennd, newnode_f);
+								nonneigh = get_neighbours(npos, lennd, newnode_f, 0);
 								clear_ll(newnode_f);
 
 								//Delete New Node from Neighbours of New Nodes neighbours
@@ -235,21 +230,21 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 									}
 									w2 = hptr -> nodeid;
 									for(o=0; o < dim; o++){
-										if(weights[w1 + o*lennd] < weights[w2 + o*lennd]){
-											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+										if(weights[w1 + o*lentn] < weights[w2 + o*lentn]){
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
 										}else{
-											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
 										}
 									}
 
 								}else if(nonneigh == NULL){
 									//Case D
 									for(o=0; o<dim; o++){
-										min=infinity();
-										max=-infinity();
+										min= INFINITY;
+										max= -INFINITY;
 										for(p=0; p<lennd; p++){
-											if(weights[p + o*lennd] > max) max = weights[p + o*lennd];
-											if(weights[p + o*lennd] < min) min = weights[p + o*lennd];
+											if(weights[p + o*lentn] > max) max = weights[p + o*lentn];
+											if(weights[p + o*lentn] < min) min = weights[p + o*lentn];
 										}
 										weights[lennd-1 + lennd*o] = (min + max) / 2;
 									}
@@ -258,11 +253,11 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 									//Case C
 									w2 = nonneigh -> nodeid;
-									for(o=0, o < dim; o++){
-										if(weights[w1 + o*lennd] < weights[w2 + o*lennd]){
-											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+									for(o=0; o < dim; o++){
+										if(weights[w1 + o*lentn] < weights[w2 + o*lentn]){
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
 										}else{
-											weights[lennd-1 + lennd*o] = weights[w1 + o*lennd]-(weights[w2 + o*lennd] - weights[w1 + o*lennd]);
+											weights[lennd-1 + lennd*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
 										}
 									}
 								}
@@ -288,20 +283,20 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		currtrain[i + 4*lentr] = nodegrow;
 
 		//Remove Empty Units
-		while(j < lennd){
+		while(j < lennd && phase == 1){
 			if(freq[j] > 0) j++;
 			else{
 				freq[j] = freq[lennd-1];
-				freq[lennd-1] = na();
+				freq[lennd-1] = 0;
 
 				npos[j] = npos[lennd-1];
 				npos[j + lennd] = npos[lennd-1 + lennd];
-				npos[lennd-1] = na();
-				npos[lennda-1 + lennd] = na();
+				npos[lennd-1] = 0.0/0.0;
+				npos[lennd-1 + lennd] = 0.0/0.0;
 
 				for(k=0; k<dim; k++){
-					weights[j + k*lennd] = weights[lennd + k*lennd];
-					weights[lennd + k*lennd]; = na();
+					weights[j + k*lentn] = weights[lennd + k*lentn];
+					weights[lennd + k*lentn] = 0.0/0.0;
 				}
 
 				lennd--;
@@ -309,11 +304,14 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		}
 
 		//Check if Phase should change
+		if(currtrain[i-5 + 3*i] >= currtrain[i + 3*i] || i > (rep/2)){
+			phase = 2;
+		}
 
 	}
 }
 
-struct *adjust get_neighbours(double *npos, int lennd, struct adjust *origin, int adrate=0){
+struct adjust *get_neighbours(double *npos, int lennd, struct adjust *origin, int adrate){
 
 	struct adjust *nroot, *tmp;
 	int isneighbour, exclude;
@@ -322,12 +320,12 @@ struct *adjust get_neighbours(double *npos, int lennd, struct adjust *origin, in
 	nroot = NULL;
 
 	//Origin is a list of n nodes, to which neighbours should be found
-	while(orign != NULL){
+	while(origin != NULL){
 		for(l=0; l<lennd; l++){
 			isneighbour = 0;
 
 			for(m=0; m < 4; m++){
-				if(npos[l] == npos[nearest + ax[m]] && npos[l + lennd] == npos[nearest + ay[m] + lennd])
+				if(npos[l] == npos[origin -> nodeid + ax[m]] && npos[l + lennd] == npos[origin -> nodeid + ay[m] + lennd])
 					isneighbour = 1;
 			}
 
@@ -336,7 +334,7 @@ struct *adjust get_neighbours(double *npos, int lennd, struct adjust *origin, in
 
 				//Sort out nodes that are in the input LL
 				exclude=0;
-				tmp = root;
+				tmp = origin;
 				while(tmp -> next != NULL){
 					if(tmp -> nodeid == l) exclude = 1;
 					tmp = tmp -> next;
@@ -346,8 +344,8 @@ struct *adjust get_neighbours(double *npos, int lennd, struct adjust *origin, in
 				if(exclude == 0){
 					tmp = (struct adjust *) malloc( sizeof(struct adjust) );
 					tmp -> next = nroot;
-					tnode -> nodeid = l;
-					tnode -> adrate = adrate;
+					tmp -> nodeid = l;
+					tmp -> adrate = adrate;
 					nroot = tmp;
 				}
 
