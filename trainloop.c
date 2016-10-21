@@ -18,7 +18,7 @@ struct adjust{
 int ax[4] = {0, 0, 1, -1};
 int ay[4] = {1, -1, 0, 0};
 
-struct adjust *get_neighbours(double *npos, int lennd, struct adjust *origin, int adrate);
+struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, int adrate);
 void clear_ll(struct adjust *root);
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
@@ -36,7 +36,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 	int nind, radius;
 	double dist, tmp, dm, lr, errorsum;
 	int nodegrow, x;
-	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2;
+	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f;
 
 	root = (struct adjust *) malloc( sizeof(struct adjust) );
 	root -> next = (struct adjust *) malloc( sizeof(struct adjust) );
@@ -70,8 +70,10 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			// Find best matching node
 			nind = 0;
 			nearest = -1;
-			dm = 9999;
+			dm = INFINITY;
+			printf("lennd %d", lennd);
 			for (k = 0; k < lennd; k++) {
+				printf("l");
 				dist = 0.0;
 				for (l = 0; l < dim; l++) {
 					tmp = df[x + lendf*l] - weights[k + l*lentn];
@@ -79,7 +81,9 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				}
 
 				if (dist <= dm * (1 + EPS)) {
+					printf("i");
 					if (dist < dm * (1 - EPS)) {
+						printf("il");
 						nind = 0;
 						nearest = k;
 					} else {
@@ -88,6 +92,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 					dm = dist;
 				}
 			}
+			if(nearest == -1) error("Critical: No best matching unit found.");
 
 			distnd[nearest] += dm;
 			errorsum += dm;
@@ -100,41 +105,15 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			// Find neighbourhood
 			root -> nodeid = nearest;
 			root -> adrate = 1;
+			root -> next = NULL;
+
 			for(k = radius; k>0; k--){
+
+				tnode = get_neighbours(npos, lennd, lentn, root, 1); // Fix adrate.
 				current = root;
-				if(root -> next == NULL) error("Error in Linked List");
+				while(current -> next != NULL) current = current -> next;
+				current -> next = tnode;
 
-				printf("Current: %d, %d\n", current -> nodeid, k);
-				while(current -> next != NULL){
-					for(l=0; l<lennd; l++){
-						printf("nops(l) %f, (l+1) %f", npos[l], npos[l+lennd]);
-						if(npos[l] == npos[current -> nodeid]+1 && npos[l+lennd] == npos[current -> nodeid+lennd] ||
-							npos[l] == npos[current -> nodeid]-1 && npos[l+lennd] == npos[current -> nodeid+lennd] ||
-							npos[l] == npos[current -> nodeid] && npos[l+lennd] == npos[current -> nodeid+lennd]+1 ||
-							npos[l] == npos[current -> nodeid] && npos[l+lennd] == npos[current -> nodeid+lennd]-1){
-
-							printf("Found a neighbour\n");
-							tmp=0;
-							tp = root;
-							while(tp -> next != NULL){
-								if(tp -> nodeid == l) tmp = 1;
-								tp = tp -> next;
-							}
-
-							if(tmp == 0){
-								tnode = (struct adjust *) malloc( sizeof(struct adjust) );
-								tnode -> next = root;
-								tnode -> nodeid = l;
-								tnode -> adrate = 1 - l/5;
-								root = tnode;
-							}
-
-						}
-					}
-					current = current -> next;
-					if(root -> next == NULL) error("Error in Linked List");
-				}
-				printf("Is.null\n");
 			}
 
 			//Adjust neighbourhood
@@ -151,6 +130,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			if(distnd[nearest] > *gt && phase == 1){
 				current = root;
 				tmp = 0;
+				// This is Broken.
 				while(root -> next -> next != NULL){
 					if(root -> adrate >= 1 - 2/5) tmp ++;
 					tp=root;
@@ -159,6 +139,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				}
 
 				if(tmp == 4){
+					//Node has 4 direct neighbours. Growth is not possible.
+					//Therefore the error is spread to neighbouring units.
 					printf("Dist\n");
 					distnd[nearest] = distnd[nearest] / 2;
 					for(l=1; l < 5; l++){
@@ -174,21 +156,33 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 					for(l=0; l<4; l++){
 						tmp = 0;
 						for(m=0; m < lennd; m++){
-							if(npos[m] == npos[nearest + ax[l]] && npos[m + lennd] == npos[nearest + ay[l] + lennd]) tmp = 1;
+							if(npos[m] == npos[nearest] + ax[l] && npos[m + lentn] == npos[nearest + lentn] + ay[l]) tmp = 1;
+							printf("npos[m]: %f, npos[m + lentn]: %f\n", npos[m], npos[m + lentn]);
 						}
+						printf("tmp is: %f", tmp);
 						if(tmp == 0){
+
+							//Init New Node Values except weights
 							lennd++;
-							npos[lennd-1] = nearest + ax[l];
-							npos[lennd*2 - 1] = nearest + ay[l];
+							npos[lennd-1] = npos[nearest] + ax[l];
+							printf("NEWNEWNEW %d \n", nearest + ax[l]);
+							npos[lennd-1 + lentn] = npos[nearest + lentn] + ay[l];
 							distnd[lennd-1] = 0;
 							freq[lennd - 1] = 0;
 
 							//Get the neighbours of the new node.
-							struct adjust *newnode;
+							//struct adjust *newnode;
+							newnode = malloc(sizeof(struct adjust));
 							newnode -> next = NULL;
 							newnode -> nodeid = m;
-							nneigh = get_neighbours(npos, lennd, newnode, 0);
+							printf("newnode: %p, %d", newnode, newnode -> nodeid);
+							printf("START INTERESSTING PART \n");
+							nneigh = get_neighbours(npos, lennd, lentn, newnode, 0);
 							clear_ll(newnode);
+
+							//printf("Prt: %d", nneigh -> nodeid);
+							if(NULL==NULL) printf("nneigh: is not null");
+							else printf("It's null. That shouldn't happen.");
 
 							if(nneigh -> next != NULL){
 								//Case B
@@ -198,10 +192,10 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 							} else{
 								//Get the neighbours of the First Neighbour of New node
-								struct adjust *newnode_f;
+								newnode_f = malloc(sizeof(struct adjust));
 								newnode_f -> next = NULL;
 								newnode_f -> nodeid = nneigh -> nodeid;
-								nonneigh = get_neighbours(npos, lennd, newnode_f, 0);
+								nonneigh = get_neighbours(npos, lennd, lentn, newnode_f, 0);
 								clear_ll(newnode_f);
 
 								//Delete New Node from Neighbours of New Nodes neighbours
@@ -264,6 +258,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								clear_ll(nonneigh);
 							}
 							clear_ll(nneigh);
+							error("Yep we are growing a new one.");
 						}
 					}
 
@@ -304,44 +299,52 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		}
 
 		//Check if Phase should change
-		if(currtrain[i-5 + 3*i] >= currtrain[i + 3*i] || i > (rep/2)){
+		if(i > 4 && currtrain[i-5 + 3*i] >= currtrain[i + 3*i] || i > (rep/2)){
 			phase = 2;
 		}
 
 	}
 }
 
-struct adjust *get_neighbours(double *npos, int lennd, struct adjust *origin, int adrate){
+struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, int adrate){
 
 	struct adjust *nroot, *tmp;
 	int isneighbour, exclude;
 	int l, m;
 
+	printf("Search for n of: %d", origin -> nodeid);
+
 	nroot = NULL;
 
 	//Origin is a list of n nodes, to which neighbours should be found
+	if(origin == NULL) error("Origin is null.");
 	while(origin != NULL){
 		for(l=0; l<lennd; l++){
+			printf("loop::%f::", npos[origin -> nodeid]);
 			isneighbour = 0;
 
 			for(m=0; m < 4; m++){
-				if(npos[l] == npos[origin -> nodeid + ax[m]] && npos[l + lennd] == npos[origin -> nodeid + ay[m] + lennd])
-					isneighbour = 1;
+				if(npos[l] == npos[origin -> nodeid] + ax[m] && npos[l + lentn] == npos[origin -> nodeid + lentn] + ay[m])
+					{isneighbour = 1; printf("Candidate Found.");}
+					printf("_cc_");
+					printf("%f, %f", npos[origin -> nodeid] + ax[m], npos[origin -> nodeid + lentn] + ay[m]);
 			}
 
-			if(isneighbour == 1){
-				printf("Found a neighbour\n");
 
+			if(isneighbour == 1){
+printf("_aa_");
 				//Sort out nodes that are in the input LL
 				exclude=0;
 				tmp = origin;
 				while(tmp -> next != NULL){
 					if(tmp -> nodeid == l) exclude = 1;
+					printf("Exclude Check, for found element.");
 					tmp = tmp -> next;
 				}
-
+printf("_dd_%d", exclude);
 				//Add Node to new LL
 				if(exclude == 0){
+					printf("Added to LL");
 					tmp = (struct adjust *) malloc( sizeof(struct adjust) );
 					tmp -> next = nroot;
 					tmp -> nodeid = l;
@@ -352,8 +355,9 @@ struct adjust *get_neighbours(double *npos, int lennd, struct adjust *origin, in
 			}
 		}
 		origin = origin -> next;
-	}
 
+	}
+	printf("nroot: %p", nroot);
 	return nroot;
 }
 
@@ -389,6 +393,7 @@ struct adjust *get_neighbours(double *npos, int lennd, struct adjust *origin, in
 	}
 } */
 
+// House keeping, to avoid memory leaks.
 void clear_ll(struct adjust *root){
 	struct adjust *tmp;
 	while(root != NULL){
