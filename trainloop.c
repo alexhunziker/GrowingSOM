@@ -138,6 +138,10 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			// Growth / Spreading
 			//printf("Gt & distnd %f, %f", *gt, distnd[nearest]);
 			if(distnd[nearest] > *gt && phase == 1){
+
+				//Determine if maximum size of net is reached
+				if(!(lentn-1 > lennd)) error("Number of nodes exceeded maximum capacity. Consider adjusting max gridsize or reducing Spreading Factor.");
+
 				current = root;
 				tmp = 0;
 				while(current != NULL){
@@ -152,7 +156,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				if(tmp > 4){
 					//Node has 4 direct neighbours. Growth is not possible.
 					//Therefore the error is spread to neighbouring units.
-					//printf("Dist:");
+					printf("Dist:");
 					distnd[nearest] = distnd[nearest] / 2;
 					for(l=1; l < 5; l++){
 						// Paper suggests values between 0 and 1
@@ -326,7 +330,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		}
 
 		//Check if Phase should change
-		if(i > 4 && currtrain[i-5 + 3*i] >= currtrain[i + 3*i] || i > (rep/2)){
+		if((i > 4 && currtrain[i-5 + 3*lentr] >= currtrain[i-1 + 3*lentr]) || (i+1) > (rep/2)){
 			phase = 2;
 		}
 

@@ -3,7 +3,7 @@ df = iris[,1:4]
 
 dyn.load("trainloop.so")
 
-repet <- 15;
+repet <- 100;
 lentr <- 100
 
 df = as.matrix(df)
@@ -18,7 +18,7 @@ weights[1:4,] <- runif(4*ncol(df))
 distnd <- rep(0, 100) #Error per node
 freq <- rep(0, 100) #Frequ of nodes
 
-gt = -ncol(df) * log(0.9)
+gt = -ncol(df) * log(0.8)
 
 npos <- matrix(0, nrow=100, ncol=2)
 npos[1:4,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
