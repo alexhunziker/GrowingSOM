@@ -18,7 +18,7 @@ weights[1:4,] <- runif(4*ncol(df))
 distnd <- rep(0, 100) #Error per node
 freq <- rep(0, 100) #Frequ of nodes
 
-gt = -ncol(df) * log(0.7)
+gt = -ncol(df) * log(0.9)
 
 npos <- matrix(0, nrow=100, ncol=2)
 npos[1:4,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
@@ -58,3 +58,6 @@ distnd <- outc$distnd
 
 plot(npos, type="n", col="white")
 text(npos[,1], npos[,2], freq)
+
+plot(npos, type="n", col="white")
+text(npos[,1], npos[,2], format(round(weights[,2], 2), nsmall = 2))

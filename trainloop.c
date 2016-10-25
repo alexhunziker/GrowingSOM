@@ -50,7 +50,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 	phase = 1;
 
 	// Loop over iterations of the input data
-	for(i = 1; i<=rep; i++){
+	for(i = 0; i<rep; i++){
 
 		// Reset Frequencies
 		// In order to be able to delete unneeded nodes
@@ -60,7 +60,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		errorsum = 0;
 
 		lr = lrinit;
-		printf("Lr= %f, lrinit= %f\n", lr, lrinit);
+		//printf("Lr= %f, lrinit= %f\n", lr, lrinit);
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -80,8 +80,10 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				dist = 0.0;
 				for (l = 0; l < dim; l++) {
 					tmp = df[x + lendf*l] - weights[k + l*lentn];
+					//printf("%f,", tmp);
 					dist += tmp * tmp;
 				}
+				//printf(". dist=%f\n", dist);
 
 				if (dist <= dm * (1 + EPS)) {
 					//printf("i");
@@ -95,6 +97,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 					dm = dist;
 				}
 			}
+			//printf("//////////////dm= %f\n", dm);
 			if(nearest == -1) error("Critical: No best matching unit found.");
 
 			distnd[nearest] += dm;
@@ -133,6 +136,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			}
 
 			// Growth / Spreading
+			//printf("Gt & distnd %f, %f", *gt, distnd[nearest]);
 			if(distnd[nearest] > *gt && phase == 1){
 				current = root;
 				tmp = 0;
@@ -148,12 +152,14 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				if(tmp > 4){
 					//Node has 4 direct neighbours. Growth is not possible.
 					//Therefore the error is spread to neighbouring units.
-					printf("Dist\n");
+					//printf("Dist:");
 					distnd[nearest] = distnd[nearest] / 2;
 					for(l=1; l < 5; l++){
 						// Paper suggests values between 0 and 1
 						current = current -> next;
+						//printf(" before: %f", distnd[current -> nodeid]);
 						distnd[current -> nodeid] = distnd[current -> nodeid] * (1 + 0.5);
+						//printf(" after: %f\n", distnd[current -> nodeid]);
 					}
 				} else {
 					printf("Grow ");
@@ -162,6 +168,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 					//Growthcondition
 					for(l=0; l<4; l++){
 						tmp = 0;
+						//If tmp remains 0, an empty spot for a new node was found.
 						for(m=0; m < lennd; m++){
 							if(npos[m] == npos[nearest] + ax[l] && npos[m + lentn] == npos[nearest + lentn] + ay[l]) tmp = 1;
 							//printf("npos[m]: %f, npos[m + lentn]: %f\n", npos[m], npos[m + lentn]);
@@ -181,7 +188,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 							//struct adjust *newnode;
 							newnode = malloc(sizeof(struct adjust));
 							newnode -> next = NULL;
-							newnode -> nodeid = m;
+							newnode -> nodeid = lennd-1;
 							//printf("newnode: %p, %d", newnode, newnode -> nodeid);
 							//printf("START INTERESSTING PART \n");
 							nneigh = get_neighbours(npos, lennd, lentn, newnode, 0);
@@ -202,7 +209,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								//Get the neighbours of the First Neighbour of New node
 								newnode_f = malloc(sizeof(struct adjust));
 								newnode_f -> next = NULL;
-								newnode_f -> nodeid = nneigh -> nodeid;
+								newnode_f -> nodeid = nneigh -> nodeid; // equal to nearest.
+								if(nneigh-> nodeid != nearest) error("Well it is not. Error or Denkfehler? %d, %d", nneigh -> nodeid, lennd-1);
 								nonneigh = get_neighbours(npos, lennd, lentn, newnode_f, 0);
 								clear_ll(newnode_f);
 
@@ -211,27 +219,28 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								hptr = nonneigh;
 								tmp = -1;
 								while(hptr != NULL){
-									if(hptr -> nodeid == nneigh -> nodeid){
+									if(hptr -> nodeid == lennd-1){ //nneigh -> nodeid
 										hptr2 = hptr -> next;
 										hptr -> nodeid = hptr2 -> nodeid;
 										hptr -> next = hptr2 -> next;
 										free(hptr2);
 									}
 									for(o=0; o < 4; o++){
-										if(npos[hptr -> nodeid] == npos[nearest] + ax[o]*2 && npos[hptr -> nodeid + lentn] == npos[nearest + lentn] + ay[o]*2 ) tmp = o;
+										if(npos[hptr -> nodeid] == npos[lennd-1] + ax[o]*2 && npos[hptr -> nodeid + lentn] == npos[lennd-1 + lentn] + ay[o]*2 ) tmp = hptr -> nodeid;
 									}
 									hptr = hptr -> next;
 								}
 
-								w1 = nneigh -> nodeid;
+								w1 = nearest; //nneigh -> nodeid
 								if(tmp != -1){
 									//Case A (Parent node w1 has a node w2 lying in the same direction as w1 lies in respect to new node)
 									printf("A");
-									hptr = nonneigh;
+									/*hptr = nonneigh;
 									for(o=0; o<tmp; o++){
 										hptr = hptr -> next;
-									}
-									w2 = hptr -> nodeid;
+									}*/ //Probably superfluid
+
+									w2 = tmp; //was hptr -> nodeid
 									for(o=0; o < dim; o++){
 										if(weights[w1 + o*lentn] < weights[w2 + o*lentn]){
 											weights[lennd-1 + lentn*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
@@ -273,8 +282,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 						}
 
 					}
-
 					printf("Growthcondidtion stop.\n%d lennd, %f dist, %f xpos\n\n", lennd, distnd[lennd-1], npos[lennd-1]);
+
 					lr = lrinit;
 					distnd[nearest] = 0;
 				}
@@ -303,13 +312,13 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				freq[lennd-1] = 0;
 
 				npos[j] = npos[lennd-1];
-				npos[j + lennd] = npos[lennd-1 + lennd];
+				npos[j + lentn] = npos[lennd-1 + lentn];
 				npos[lennd-1] = 0.0/0.0;
-				npos[lennd-1 + lennd] = 0.0/0.0;
+				npos[lennd-1 + lentn] = 0.0/0.0;
 
 				for(k=0; k<dim; k++){
-					weights[j + k*lentn] = weights[lennd + k*lentn];
-					weights[lennd + k*lentn] = 0.0/0.0;
+					weights[j + k*lentn] = weights[lennd-1 + k*lentn];
+					weights[lennd-1 + k*lentn] = 0.0/0.0;
 				}
 
 				lennd--;
