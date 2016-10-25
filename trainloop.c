@@ -26,25 +26,23 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, Sint *pradius,
 		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr){
 
-	int nearest, totiter, phase;
-	int i, j, k, l, m, n, o, p;
-	int w1, w2;
-	double min, max;
-	double meandist, adrate;
-	struct adjust *nneigh, *nonneigh;
-	double lrinit = *plrinit;
+	//Convert pointers
 	int rep = *prep, lendf = *plendf, lennd = *plennd, dim = *pdim, initradius = *pradius;
 	int lentn = *plentn, lentd = *plentd, lentr = *plentr;
-	int nind;
+	double lrinit = *plrinit;
+
+	//Declare variables
+	int nearest, totiter, phase, w1, w2, nind;
+	int i, j, k, l, m, n, o, p;
+	double min, max, meandist, adrate;
+	struct adjust *nneigh, *nonneigh;
 	double dist, tmp, dm, lr, errorsum, radius;
 	int nodegrow, x;
 	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f;
 	double sr = 0.5;
 
+	//Prepare LL
 	root = (struct adjust *) malloc( sizeof(struct adjust) );
-	root -> next = (struct adjust *) malloc( sizeof(struct adjust) );
-	root -> next -> next = NULL;
-	root -> next -> nodeid = -1;
 
 	totiter = rep * lendf;
 
