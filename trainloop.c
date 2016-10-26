@@ -64,10 +64,11 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 		// Reseting Learning rate during each iteration.
 		// It should be considered if this:
-		//  -Should be ommited for the training phase
+		//  -Should be ommited for the growing phase
 		//  -The calculation of the learning rate from the traditional Kohonen should be used for
 		//   the phase 2.
-		lr = lrinit;
+		if(phase == 1) lr = lrinit;
+		else lr = lrinit - i/rep*lrinit;
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -406,7 +407,7 @@ struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust 
 	nroot = NULL;
 
 	//Origin is a linked list containing of n nodes, to which neighbours should be found
-	if(origin == NULL) error("Linked list which should contain the origin is empty.");
+	if(origin == NULL) error("Linked list which should contain at least one origin is empty.");
 
 	while(origin != NULL){
 
