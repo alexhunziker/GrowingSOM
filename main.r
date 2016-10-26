@@ -13,6 +13,6 @@ source("summary.r")
 source("plot.r")
 source("train.r")
 
-
+dyn.load("trainloop.so")
 
 print("GSOM loaded.")

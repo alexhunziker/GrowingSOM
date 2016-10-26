@@ -7,13 +7,15 @@
 # This is a example file to test and demonstrate the 
 # functionality of the gsom functions.
 
-setwd("Q:/Abteilungsprojekte/eng/SWWData/Alex/gsom")
+#setwd("Q:/Abteilungsprojekte/eng/SWWData/Alex/gsom")
+setwd("~/gsom")
 source("main.r")
 
 # Load Data
-load("Q:/Abteilungsprojekte/eng/SWWData/Alex/Validation/SBR_raw.RData")
+#load("Q:/Abteilungsprojekte/eng/SWWData/Alex/Validation/SBR_raw.RData")
+load("/media/SWW/Alex/Validation/SBR_raw.RData")
 testdf <- testdata$n_07_06[1:2000,3:ncol(testdata$n_07_06)]
-traindata <- traindata[500:1000,3:ncol(traindata)]
+traindata <- traindata[1:5000,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- gsom.train(traindata, 
