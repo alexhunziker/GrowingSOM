@@ -37,13 +37,13 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
          type="p", main=paste("Avgerage Euclidan Distance From BMU"), xlab="", ylab="", xaxt='n', yaxt='n',
-         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$error,c(0,1,1),c(1,1,0), 0)
+         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$error,c(0.9,0),c(0.9,0),c(0.9,1))
     )
     minattr <- min(gsom_object$nodes$error)
     maxattr <- max(gsom_object$nodes$error)
     scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
     image.plot(legend.only=TRUE, zlim=c(min(gsom_object$nodes$error),max(gsom_object$nodes$error)),
-               col=plotrix::color.scale(scale,c(0,1,1),c(1,1,0),0))
+               col=plotrix::color.scale(scale,c(0.9,0),c(0.9,0),c(0.9,1)))
     par(mar=c(5.1,4.1,4.1,2.1))
     
   } else if(type == "dist_neighbours") {

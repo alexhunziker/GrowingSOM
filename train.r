@@ -91,7 +91,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   colnames(npos) <- c("x", "y")
   
   freq <- outc$freq[1:outc$plennd]
-  distnd <- outc$distnd
+  distnd <- outc$distnd[1:outc$plennd]
   
   nodes <- list(
     position = data.frame(npos),

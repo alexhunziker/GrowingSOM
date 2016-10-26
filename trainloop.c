@@ -368,12 +368,28 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			phase = 2;
 		}
 
+		printf("| ");
+		tmp = (double)i/(double)rep*20;
+		for(j=0; j!=20; j++){
+			if(tmp>0){
+				tmp--;
+				printf("-");
+			} else {
+				printf(" ");
+			}
+		}
+		printf(" |\n");
+
 	}
 
 	//Iteration i is completed
 
 	//Update Return Values
 	*plennd = lennd;
+
+	for(i=0; i < lennd; i++){
+		if(freq[i] != 0) distnd[i] = distnd[i] / freq[i];
+	}
 
 }
 
