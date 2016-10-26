@@ -23,18 +23,18 @@ void clear_ll(struct adjust *root);
 void print_ll(struct adjust *root);
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
-		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, Sint *pradius,
+		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
 		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr){
 
 	//Convert pointers
-	int rep = *prep, lendf = *plendf, lennd = *plennd, dim = *pdim, initradius = *pradius;
+	int rep = *prep, lendf = *plendf, lennd = *plennd, dim = *pdim;
 	int lentn = *plentn, lentd = *plentd, lentr = *plentr;
-	double lrinit = *plrinit;
+	double lrinit = *plrinit, initradius = *pradius;
 
 	//Declare variables
 	int nearest, totiter, phase, w1, w2, nind;
 	int i, j, k, l, m, n, o, p;
-	double min, max, meandist, adrate;
+	double min, max, meandist, adrate, q;
 	struct adjust *nneigh, *nonneigh;
 	double dist, tmp, dm, lr, errorsum, radius;
 	int nodegrow, x;
@@ -59,7 +59,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		errorsum = 0;
 
 		if(i == rep-1){
-			for(j = 0; j<lennd; j++) distnd[j] = 0; 
+			for(j = 0; j<lennd; j++) distnd[j] = 0;
 		}
 
 		// Reseting Learning rate during each iteration.
@@ -113,30 +113,30 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			freq[nearest]++;
 
 			//Detect Radius
-// This is broken because it gives back only the max radius and 1... Problem with integer and doubles.
 			if(phase == 1) radius = initradius;
-			else radius = initradius * ((rep - i) / rep) + 1.0;
+			else radius = initradius * ((double)rep - i) / (double)rep;
 
 			// Find neighbourhood
 			root -> nodeid = nearest;
 			root -> adrate = 1;
 			root -> next = NULL;
 
-			for(k = radius; k>0; k--){
+			for(n = radius; n >= 1; n--){
 
-				adrate = k/(radius+1.0);
+				adrate = (double)n/(radius+1.0);
 				tnode = get_neighbours(npos, lennd, lentn, root, adrate);
 				current = root;
 				while(current -> next != NULL) current = current -> next;
 				current -> next = tnode;
 
 			}
+			//print_ll(root);
 
 			//Adjust neighbourhood
 			current = root;
 			while(current -> next != NULL){
 
-				for(k; k<dim; k++){
+				for(k=0; k<dim; k++){
 					weights[current -> nodeid + k*lentn] = weights[current -> nodeid+ k*lentn] +
 						(df[x + k*lendf] - weights[current -> nodeid+ k*lentn]) * lr * current -> adrate;
 				}
@@ -457,4 +457,5 @@ void print_ll(struct adjust *root){
 		printf("NodeId = %d, Adrate=%f", root -> nodeid, root -> adrate);
 		root = root -> next;
 	}
+	printf("\n");
 }

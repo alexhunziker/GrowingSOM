@@ -7,6 +7,7 @@
 # Loads all functionality for the GSOM
 
 library(plotrix)
+library(fields)
 
 source("map.r")
 source("summary.r")

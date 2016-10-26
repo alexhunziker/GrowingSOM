@@ -71,7 +71,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
             pdim = as.integer(ncol(df)),
             gt = as.double(gt), # Growth Rate
             npos = as.double(npos),
-            pradius = as.integer(radius), 
+            pradius = as.double(radius), 
             plentn = as.integer(lentn), #Max num of nodes
             plentd = as.integer(nrow(df)),
             currtrain = as.double(currtrain),
