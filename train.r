@@ -82,8 +82,9 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   training <- training[1:repet,]
   colnames(training) <- c("iteration", "training_stage", "meandist", "num_of_nodes", "nodegrowth")
   
-  weights <- matrix(outc$weights, ncol=4)
+  weights <- matrix(outc$weights, ncol=ncol(df))
   weights <- weights[1:outc$plennd,]
+  colnames(weights) <- colnames(df)
   
   npos <- matrix(outc$npos, ncol=2)
   npos <- npos[1:outc$plennd,]

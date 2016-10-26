@@ -15,7 +15,7 @@ source("main.r")
 #load("Q:/Abteilungsprojekte/eng/SWWData/Alex/Validation/SBR_raw.RData")
 load("/media/SWW/Alex/Validation/SBR_raw.RData")
 testdf <- testdata$n_07_06[1:2000,3:ncol(testdata$n_07_06)]
-traindata <- traindata[1:5000,3:ncol(traindata)]
+traindata <- traindata[1:3000,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- gsom.train(traindata, 
@@ -33,8 +33,8 @@ gsom.plot(gsom_model, type="property", dim=8, main="Testplot")
 gsom.plot(gsom_model, type="training")
 gsom.plot(gsom_model, type="dist")
 
+gsom.plot(mapped_realdata)
 gsom.plot(mapped_testdata)
-print_crude(mapped_testdata)
 
 
 

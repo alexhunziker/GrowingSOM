@@ -58,6 +58,10 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		nodegrow = 0;
 		errorsum = 0;
 
+		if(i == rep-1){
+			for(j = 0; j<lennd; j++) distnd[j] = 0; 
+		}
+
 		// Reseting Learning rate during each iteration.
 		// It should be considered if this:
 		//  -Should be ommited for the training phase
