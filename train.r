@@ -16,7 +16,10 @@ gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, al
   max <- apply(data, 2, function(x){max(x)})
   df <- t(apply(data, 1, function(x){(x-min)/(max-min)}))
   
+  t1 <- Sys.time()
   gsom_model <- gsom.grow(gsom_model, df, iterations, spreadFactor)
+  t2 <- Sys.time()
+  print(t2-t1)
   
   norm_param <- data.frame(min = min, max = max)
   gsom_model[["norm_param"]] <- norm_param
@@ -49,7 +52,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   distnd <- rep(0, lentn) #Error per node
   freq <- rep(0, lentn) #Frequ of nodes
   
-  gt = -ncol(df) * log(spreadFactor)
+  gt = -ncol(df) * log(spreadFactor) * 0.01*nrow(df)
   
   npos <- matrix(0, nrow=lentn, ncol=2)
   npos[1:4,] <- c(0, 1, 1, 0, 1, 0, 1, 0)

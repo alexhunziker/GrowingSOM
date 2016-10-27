@@ -38,7 +38,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 	struct adjust *nneigh, *nonneigh;
 	double dist, tmp, dm, lr, errorsum, radius;
 	int nodegrow, x;
-	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f;
+	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
 	double sr = 0.5;
 
 	//Prepare LL
@@ -58,7 +58,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		nodegrow = 0;
 		errorsum = 0;
 
-		if(i == rep-1){
+		if(i == rep-1 || phase==1){
 			for(j = 0; j<lennd; j++) distnd[j] = 0;
 		}
 
@@ -74,7 +74,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		for(j = 0; j<lendf; j++){
 
 			//Select Random observation
-			x = (lendf*unif_rand());
+			x = ((lendf-1) * unif_rand());
 
 			//Adjust learning Rate
 			lr = *alpha * ( 1-(3.8/lennd))*lr;
@@ -131,7 +131,6 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 				current -> next = tnode;
 
 			}
-			//print_ll(root);
 
 			//Adjust neighbourhood
 			current = root;
@@ -215,6 +214,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 							if(nneigh -> next != NULL){
 
 								//Case B (More than one direct neighbour exists)
+								//printf("B");
+
 								for(n=0; n<dim; n++){
 									weights[lennd-1 + n*lentn] = (weights[nneigh -> nodeid + n*lentn] + weights[nneigh -> next -> nodeid + n*lentn]) / 2;
 								}
@@ -238,11 +239,14 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								while(hptr != NULL){
 
 									//...Remove new node from list
-									if(hptr -> nodeid == lennd-1){ //nneigh -> nodeid
+									if(hptr -> nodeid == lennd-1){
 										hptr2 = hptr -> next;
-										hptr -> nodeid = hptr2 -> nodeid;
-										lr = lrinit;
-										hptr -> next = hptr2 -> next;
+										if(hptr2 != NULL){
+											hptr -> nodeid = hptr2 -> nodeid;
+											hptr -> next = hptr2 -> next;
+										} else {
+											prev -> next = NULL;
+										}
 										free(hptr2);
 									}
 
@@ -251,7 +255,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 										if(npos[hptr -> nodeid] == npos[lennd-1] + ax[o]*2 && npos[hptr -> nodeid + lentn] == npos[lennd-1 + lentn] + ay[o]*2 ) tmp = hptr -> nodeid;
 									}
 
-									hptr = hptr -> next;
+									prev = hptr;
+									if(hptr!=NULL) hptr = hptr -> next;
 
 								}
 
@@ -260,6 +265,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 									//Case A (Parent node w1 has a node w2 lying in the same direction as w1 lies in respect to new node)
 									w2 = tmp;
+									//printf("A");
 									for(o=0; o < dim; o++){
 										if(weights[w1 + o*lentn] < weights[w2 + o*lentn]){
 											weights[lennd-1 + lentn*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
@@ -273,6 +279,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 									//Case D (only direct neghbour of new nowde has no neighbours)
 									//Initialize w. average weights according to paper.
+									printf("D");
 									for(o=0; o<dim; o++){
 
 										//Find min and max for each weight
@@ -290,6 +297,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								}else{
 
 									//Case C (Parent node w1 has neighbours but none that qualifies for case A)
+									//printf("C");
 									w2 = nonneigh -> nodeid; //Random existing neighbour of nearest.
 
 									for(o=0; o < dim; o++){
@@ -332,7 +340,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 		//Update Training Progress
 		meandist = errorsum / lendf;
-		currtrain[i + 0*lentr] = i;
+		currtrain[i + 0*lentr] = i+1;
 		currtrain[i + 1*lentr] = phase;
 		currtrain[i + 2*lentr] = meandist;
 		currtrain[i + 3*lentr] = lennd;
