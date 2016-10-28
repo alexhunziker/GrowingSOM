@@ -3,12 +3,12 @@
 //Alex Hunziker - 28.10.2016
 ////////////////////////////////////////
 
-#include<R.h>
-#include<math.h>
+#include <R.h>
+#include <math.h>
 
 #define EPS 1e-4                /* relative test of equality of distances */
 
-void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *weights, Sint *lentn, Sint *codes, double *ndist){
+void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *weights, Sint *codes, double *ndist){
   
   int lendf = *plendf;
   
@@ -29,7 +29,7 @@ void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *weights,
       //Compute Euclidean Distance
       dist = 0.0;
       for (l = 0; l < dim; l++) {
-        tmp = df[i + lendf*l] - weights[k + l*lentn];
+        tmp = df[i + lendf*l] - weights[k + l*lennd];
         dist += tmp * tmp;
       }
       
