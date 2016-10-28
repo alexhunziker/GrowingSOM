@@ -7,8 +7,8 @@
 # This is a example file to test and demonstrate the 
 # functionality of the gsom functions.
 
-#setwd("Q:/Abteilungsprojekte/eng/SWWData/Alex/gsom")
-setwd("~/gsom")
+setwd("Q:/Abteilungsprojekte/eng/SWWData/Alex/gsom")
+#setwd("~/gsom")
 source("main.r")
 
 # Load Data
