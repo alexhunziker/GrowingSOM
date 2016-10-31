@@ -8,7 +8,7 @@
 
 #define EPS 1e-4                /* relative test of equality of distances */
 
-void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *weights, Sint *codes, double *ndist){
+void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *weights, double *codes, double *ndist, double *freq){
   
   int lendf = *plendf;
   
@@ -24,15 +24,16 @@ void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *weights,
     dm = INFINITY;
     
     //Check every node
-    for (k = 0; k < lennd; k++) {
+    for (k = 0; k < *lennd; k++) {
       
       //Compute Euclidean Distance
       dist = 0.0;
-      for (l = 0; l < dim; l++) {
-        tmp = df[i + lendf*l] - weights[k + l*lennd];
+      for (l = 0; l < *dim; l++) {
+        tmp = df[i + lendf*l] - weights[k + l * *lennd];
+        if(k==49) printf("%d, %d: %f, %f, %f\n", i, l, df[i + lendf*l], weights[k + l * *lennd], tmp);
         dist += tmp * tmp;
       }
-      
+
       //Check if current node is nearest so far
       if (dist <= dm * (1 + EPS)) {
         if (dist < dm * (1 - EPS)) {
@@ -47,7 +48,11 @@ void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *weights,
     }
     
     ndist[i] = dm;
-    codes[i] = nearest;
+    codes[i] = nearest+1;
+    
+    if(nearest == -1) error("No nearest unit found.");
+    
+    freq[nearest] = freq[nearest] + 1;
     
   }
 }

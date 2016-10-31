@@ -109,8 +109,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			if(nearest == -1) error("Critical: No best matching node found. This should not happen.");
 
 			//Update some counters
-			distnd[nearest] += sqrt(dm);
-			errorsum += sqrt(dm);
+			distnd[nearest] += dm;
+			errorsum += dm;
 			freq[nearest]++;
 
 			//Detect Radius

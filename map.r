@@ -10,39 +10,44 @@
 # Returns: mapped_data, which includes the nodes with position of nodes, frequency and average errors
 #   as well as the error and winning node for each node of the testdata
 
-gsom.map <- function(newdf, gsom_model) {
+gsom.map <- function(df, gsom_model, retaindata=FALSE){
   
-  nodes <- list(
-    position = gsom_model$nodes$position,
-    weight = gsom_model$nodes$weight,
-    avgerror = rep(0, nrow(gsom_model$nodes$position)),
-    freq = rep(0, nrow(gsom_model$nodes$position))
+  # Normalizing the training or testdata (min/max) in order to balance the impact
+  # of the different properties of the dataframe
+  min <- gsom_model$norm_param$min
+  max <- gsom_model$norm_param$max
+  df <- t(apply(df, 1, function(x){(x-min)/(max-min)}))
+  
+  codes <- rep(0, times=nrow(df))
+  ndist <- rep(0, times=nrow(df))
+  freq <- rep(0, times=nrow(gsom_model$nodes$weight))
+  
+  outc = .C("map_data",
+            plendf = as.integer(nrow(df)),
+            lennd = as.integer(nrow(gsom_model$nodes$weight)),
+            dim = as.integer(ncol(gsom_model$nodes$weight)),
+            df = as.double(df),
+            weights =as.double(as.matrix(gsom_model$nodes$weight)), 
+            codes = as.double(codes),
+            ndist = as.double(ndist),
+            freq = as.double(freq)
   )
   
-  observation <- data.frame(
-    winner = numeric(),
-    error = numeric()
-  )
+  dist <- outc$ndist
+  code <- outc$codes
+  print(code)
+
+  gsom_mapped = list();
+  gsom_mapped[["nodes"]] = gsom_model$nodes
+  gsom_mapped[["nodes"]]$error = NULL
+  gsom_mapped[["nodes"]]$freq = outc$freq
+  gsom_mapped[["mapped"]] = data.frame(codes=code, dist=dist)
+  gsom_mapped[["predict"]] = predict
+  gsom_mapped[["norm_param"]] = gsom_model$scale
+  if(retaindata) gsom_mapped[["data"]] == df;
   
-  mapped_data <- list(nodes = nodes, observation = observation)
+  class(gsom_mapped) = "gsom_mapped"
   
-  newdf <- t(apply(newdf, 1, function(x){(x-gsom_model$norm_param$min)/(gsom_model$norm_param$max-gsom_model$norm_param$min)}))
+  return(gsom_mapped)
   
-  for(j in 1:nrow(newdf)){
-    errors <- sqrt(rowSums(sweep(gsom_model$nodes$weight, MARGIN = 2, newdf[j,], FUN="-")^2, dims=1))
-    
-    minError=min(errors)
-    winner <- which(grepl(minError, errors))
-    #print(paste("Map:", winner))
-    if(length(winner)>1) winner <- winner[1]
-    
-    mapped_data$nodes$freq[winner] <- mapped_data$nodes$freq[winner] + 1
-    mapped_data$nodes$avgerror[winner] <- mapped_data$nodes$avgerror[winner] + minError
-    
-    mapped_data$observation[j,] <- c(winner = winner, error = minError)
-  }
-  
-  mapped_data$nodes$avgerror <- mapped_data$nodes$avgerror / mapped_data$nodes$freq
-  
-  return(mapped_data)
 }

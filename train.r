@@ -107,7 +107,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   GT = outc$gt
   
   gsom_model <- list(nodes = nodes, training = training, GT = GT, norm_param=0)
-  class(gsom_model) <- "GSOM Object"
+  class(gsom_model) <- "gsom_object"
   
   return(gsom_model)
   

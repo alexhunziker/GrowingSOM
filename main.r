@@ -13,6 +13,7 @@ source("map.r")
 source("summary.r")
 source("plot.r")
 source("train.r")
+source("predict.r")
 
 dyn.load("trainloop.so")
 dyn.load("map.so")
