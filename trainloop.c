@@ -77,6 +77,9 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			x = ((lendf-1) * unif_rand());
 
 			//Adjust learning Rate
+			//Use normal kohohnen lr for spreading phase
+			//if(phase==1) lr = *alpha * ( 1-(3.8/lennd))*lr;
+			//else lr = lrinit - i/rep*lrinit;
 			lr = *alpha * ( 1-(3.8/lennd))*lr;
 
 			// Find best matching node

@@ -41,7 +41,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   lentn <- 10000
   
   lrinit <- 0.9
-  alpha <- 0.99 #Learning Rate Depreciation factor.
+  alpha <- 0.9 #Learning Rate Depreciation factor.
   radius <- 3 #Initial Radius. Missing feature.
   
   df <- as.matrix(df)

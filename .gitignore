@@ -35,3 +35,6 @@ vignettes/*.pdf
 .trainloop.so.swp
 trainloop.so
 trainloop.o
+
+map.o
+map.so

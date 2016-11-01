@@ -21,8 +21,8 @@ traindata <- traindata[1:50000,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- gsom.train(traindata, 
-                         keepdata = FALSE, iterations = 100, 
-                         spreadFactor = 0.9, alpha = 0.5)
+                         keepdata = FALSE, iterations = 50, 
+                         spreadFactor = 0.90, alpha = 0.5)
 
 # Map data
 mapped_realdata <- gsom.map(traindata, gsom_model)
@@ -41,7 +41,6 @@ predicted <- gsom.predict(traindata, gsom_model, retaindata=TRUE)
 gsom.plot(mapped_realdata)
 gsom.plot(mapped_testdata)
 gsom.plot(mapped_testdata2)
-
 
 
 # Summary

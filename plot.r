@@ -24,9 +24,12 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="p", main=paste("Density (Observations per unit)"), xlab="", ylab="", xaxt='n', yaxt='n',
+         type="n", main=paste("Density (Observations per unit)"), xlab="", ylab="", xaxt='n', yaxt='n',
          pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$freq,c(0.9,0),c(0.9,0),c(0.9,1))
     )
+    symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
+            circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
+            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$freq,c(0.9,0),c(0.9,0),c(0.9,1)))
     image.plot(legend.only=TRUE, zlim=c(min(gsom_object$nodes$freq),max(gsom_object$nodes$freq)),
                col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),c(0.9,0),c(0.9,0),c(0.9,1)))
     par(mar=c(5.1,4.1,4.1,2.1))
@@ -36,9 +39,12 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="p", main=paste("Avgerage Euclidan Distance From BMU"), xlab="", ylab="", xaxt='n', yaxt='n',
+         type="n", main=paste("Avgerage Euclidan Distance From BMU"), xlab="", ylab="", xaxt='n', yaxt='n',
          pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$error,c(0.9,0),c(0.9,0),c(0.9,1))
     )
+    symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
+            circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
+            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$error,c(0.9,0),c(0.9,0),c(0.9,1)))
     minattr <- min(gsom_object$nodes$error)
     maxattr <- max(gsom_object$nodes$error)
     scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
@@ -51,9 +57,12 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
     stop("Missing Feature. Sorry...")
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="p", main=paste("Density"), xlab="", ylab="", xaxt='n', yaxt='n',
+         type="n", main=paste("Density"), xlab="", ylab="", xaxt='n', yaxt='n',
          pch=16, cex=3, col=grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2)
     )
+    symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
+            circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
+            add = TRUE, bg=grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2))
     
   } else if(type == "training") {
     
@@ -87,9 +96,12 @@ gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
       
       plot(gsom_object$nodes$position$x, 
            gsom_object$nodes$position$y, 
-           type="p", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
+           type="n", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
            pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$weight[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95))
       )
+      symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
+              circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
+              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$weight[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
       image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
                  col=plotrix::color.scale(scale,c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
       
