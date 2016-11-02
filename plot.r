@@ -15,7 +15,7 @@
 #   plotted can be indicated.
 # Returns: nothing
 
-gsom.plot <- function(gsom_object, type="count", dim=0, main=""){
+plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
   
   if(!exists("gsom_object")) stop("GSOM object (trained model or mapped data) has to be provided.")
   

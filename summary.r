@@ -8,7 +8,7 @@
 # Requires: trained gsom_model
 # Returns: nothing
 
-gsom.summary <- function(gsom_model){
+summary.gsom <- function(gsom_model){
 
   # Information about of Training Dataset
   observations <- sum(gsom_model$nodes$freq)

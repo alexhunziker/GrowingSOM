@@ -20,9 +20,9 @@ testdf2[7] <- 0
 traindata <- traindata[1:50000,3:ncol(traindata)]
 
 # Generate gsom model
-gsom_model <- gsom.train(traindata, 
+gsom_model <- train.gsom(traindata, 
                          keepdata = FALSE, iterations = 50, 
-                         spreadFactor = 0.90, alpha = 0.5)
+                         spreadFactor = 0.9, alpha = 0.5)
 
 # Map data
 mapped_realdata <- gsom.map(traindata, gsom_model)
@@ -30,18 +30,18 @@ mapped_testdata <- gsom.map(testdf, gsom_model)
 mapped_testdata2 <- gsom.map(testdf2, gsom_model)
 
 # Plot
-gsom.plot(gsom_model)
-gsom.plot(gsom_model, type="property")
-gsom.plot(gsom_model, type="property", dim=8, main="Testplot")
-gsom.plot(gsom_model, type="training")
-gsom.plot(gsom_model, type="dist")
+plot(gsom_model)
+plot(gsom_model, type="property")
+plot(gsom_model, type="property", dim=8, main="Testplot")
+plot(gsom_model, type="training")
+plot(gsom_model, type="dist")
 
 predicted <- gsom.predict(traindata, gsom_model, retaindata=TRUE)
 
-gsom.plot(mapped_realdata)
-gsom.plot(mapped_testdata)
-gsom.plot(mapped_testdata2)
+plot(mapped_realdata)
+plot(mapped_testdata)
+plot(mapped_testdata2)
 
 
 # Summary
-gsom.summary(gsom_model)
+summary(gsom_model)
