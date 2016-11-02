@@ -68,7 +68,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		//  -The calculation of the learning rate from the traditional Kohonen should be used for
 		//   the phase 2.
 		if(phase == 1) lr = lrinit;
-		else lr = lrinit - i/rep*lrinit;
+		else lr = lrinit - (double)i/(double)rep*lrinit;
+		printf("lr=%f, phase=%d, radius=%f\n", lr, phase, radius);
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -78,9 +79,9 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 			//Adjust learning Rate
 			//Use normal kohohnen lr for spreading phase
-			//if(phase==1) lr = *alpha * ( 1-(3.8/lennd))*lr;
-			//else lr = lrinit - i/rep*lrinit;
-			lr = *alpha * ( 1-(3.8/lennd))*lr;
+			if(phase==1) lr = *alpha * ( 1-(3.8/lennd))*lr;
+			else lr = lrinit - (double)i/(double)rep*lrinit;
+			//lr = *alpha * ( 1-(3.8/lennd))*lr;
 
 			// Find best matching node
 			nind = 0;

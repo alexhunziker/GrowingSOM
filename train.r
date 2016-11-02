@@ -14,7 +14,7 @@ gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, al
   # of the different properties of the dataframe
   min <- apply(data, 2, function(x){min(x)})
   max <- apply(data, 2, function(x){max(x)})
-  df <- t(apply(data, 1, function(x){(x-min)/(max-min)}))
+  df <- t(apply(data, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
   
   t1 <- Sys.time()
   gsom_model <- gsom.grow(gsom_model, df, iterations, spreadFactor)
@@ -90,7 +90,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   colnames(weights) <- colnames(df)
   
   npos <- matrix(outc$npos, ncol=2)
-  npos <- npos[1:outc$plennd,]
+  npos <- matrix(npos[1:outc$plennd,], ncol=2)
   colnames(npos) <- c("x", "y")
   
   freq <- outc$freq[1:outc$plennd]
