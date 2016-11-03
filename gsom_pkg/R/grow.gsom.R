@@ -1,47 +1,12 @@
-#######################################
-#GSOM - Growing Self Organizing Maps
-#train.r
-#26/10/16 - Alex Hunziker
-#######################################
-
-# The Functions in this File are required in order to train the gsom model.
-# gsom.train() is the main function, which should be called by the user.
-# The performance intensive loop has been outsourced to C for performance reasons.
-
-gsom.train <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, alpha, ...){
-  
-  # Normalizing the training or testdata (min/max) in order to balance the impact
-  # of the different properties of the dataframe
-  min <- apply(data, 2, function(x){min(x)})
-  max <- apply(data, 2, function(x){max(x)})
-  df <- t(apply(data, 1, function(x){(x-min)/(max-min)}))
-  
-  t1 <- Sys.time()
-  gsom_model <- gsom.grow(gsom_model, df, iterations, spreadFactor)
-  t2 <- Sys.time()
-  print(t2-t1)
-  
-  norm_param <- data.frame(min = min, max = max)
-  gsom_model[["norm_param"]] <- norm_param
-  
-  if(keepdata==TRUE){
-    gsom_model[["data"]] = data
-  }
-  
-  return(gsom_model)
-  
-}
-
-
-#Mainly calls the C loop and processes returned data
-gsom.grow <- function(gsom_model, df, repet, spreadFactor){
+grow.gsom <-
+function(gsom_model, df, repet, spreadFactor){
   
   # Set some parameters
   lentr <- 10000
   lentn <- 10000
   
   lrinit <- 0.9
-  alpha <- 0.99 #Learning Rate Depreciation factor.
+  alpha <- 0.9 #Learning Rate Depreciation factor.
   radius <- 3 #Initial Radius. Missing feature.
   
   df <- as.matrix(df)
@@ -90,7 +55,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   colnames(weights) <- colnames(df)
   
   npos <- matrix(outc$npos, ncol=2)
-  npos <- npos[1:outc$plennd,]
+  npos <- matrix(npos[1:outc$plennd,], ncol=2)
   colnames(npos) <- c("x", "y")
   
   freq <- outc$freq[1:outc$plennd]
@@ -107,6 +72,7 @@ gsom.grow <- function(gsom_model, df, repet, spreadFactor){
   GT = outc$gt
   
   gsom_model <- list(nodes = nodes, training = training, GT = GT, norm_param=0)
+  class(gsom_model) <- "gsom"
   
   return(gsom_model)
   

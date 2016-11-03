@@ -1,14 +1,14 @@
-\name{gsom.plot}
-\alias{gsom.plot}
+\name{plot.gsom}
+\alias{plot.gsom}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+ Plot gsom models
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-gsom.plot(gsom_object, type = "count", dim = 0, main = "")
+plot.gsom(gsom_object, type = "count", dim = 0, main = "")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -63,9 +63,13 @@ function (gsom_object, type = "count", dim = 0, main = "")
     if (type == "count") {
         par(mar = c(5.1, 4.1, 4.1, 5.5))
         plot(gsom_object$nodes$position$x, gsom_object$nodes$position$y, 
-            type = "p", main = paste("Density (Observations per unit)"), 
+            type = "n", main = paste("Density (Observations per unit)"), 
             xlab = "", ylab = "", xaxt = "n", yaxt = "n", pch = 16, 
             cex = 3, col = plotrix::color.scale(gsom_object$nodes$freq, 
+                c(0.9, 0), c(0.9, 0), c(0.9, 1)))
+        symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 
+            2], circles = rep(0.4, nrow(gsom_object$nodes$position)), 
+            inches = FALSE, add = TRUE, bg = plotrix::color.scale(gsom_object$nodes$freq, 
                 c(0.9, 0), c(0.9, 0), c(0.9, 1)))
         image.plot(legend.only = TRUE, zlim = c(min(gsom_object$nodes$freq), 
             max(gsom_object$nodes$freq)), col = plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq), 
@@ -75,9 +79,13 @@ function (gsom_object, type = "count", dim = 0, main = "")
     else if (type == "dist") {
         par(mar = c(5.1, 4.1, 4.1, 5.5))
         plot(gsom_object$nodes$position$x, gsom_object$nodes$position$y, 
-            type = "p", main = paste("Avgerage Euclidan Distance From BMU"), 
+            type = "n", main = paste("Avgerage Euclidan Distance From BMU"), 
             xlab = "", ylab = "", xaxt = "n", yaxt = "n", pch = 16, 
             cex = 3, col = plotrix::color.scale(gsom_object$nodes$error, 
+                c(0.9, 0), c(0.9, 0), c(0.9, 1)))
+        symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 
+            2], circles = rep(0.4, nrow(gsom_object$nodes$position)), 
+            inches = FALSE, add = TRUE, bg = plotrix::color.scale(gsom_object$nodes$error, 
                 c(0.9, 0), c(0.9, 0), c(0.9, 1)))
         minattr <- min(gsom_object$nodes$error)
         maxattr <- max(gsom_object$nodes$error)
@@ -90,8 +98,11 @@ function (gsom_object, type = "count", dim = 0, main = "")
     else if (type == "dist_neighbours") {
         stop("Missing Feature. Sorry...")
         plot(gsom_object$nodes$position$x, gsom_object$nodes$position$y, 
-            type = "p", main = paste("Density"), xlab = "", ylab = "", 
+            type = "n", main = paste("Density"), xlab = "", ylab = "", 
             xaxt = "n", yaxt = "n", pch = 16, cex = 3, col = grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2))
+        symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 
+            2], circles = rep(0.4, nrow(gsom_object$nodes$position)), 
+            inches = FALSE, add = TRUE, bg = grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2))
     }
     else if (type == "training") {
         if (is.null(gsom_object[["training"]])) 
@@ -126,8 +137,12 @@ function (gsom_object, type = "count", dim = 0, main = "")
             maxattr <- gsom_object$norm_param[i, 2]
             scale <- seq(minattr, maxattr, by = (maxattr - minattr)/100)
             plot(gsom_object$nodes$position$x, gsom_object$nodes$position$y, 
-                type = "p", main = main, xlab = "", ylab = "", 
+                type = "n", main = main, xlab = "", ylab = "", 
                 xaxt = "n", yaxt = "n", pch = 16, cex = 3, col = plotrix::color.scale(gsom_object$nodes$weight[, 
+                  i], c(0.3, 0.9), c(0, 0.95), c(0.3, 0.95)))
+            symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 
+                2], circles = rep(0.4, nrow(gsom_object$nodes$position)), 
+                inches = FALSE, add = TRUE, bg = plotrix::color.scale(gsom_object$nodes$weight[, 
                   i], c(0.3, 0.9), c(0, 0.95), c(0.3, 0.95)))
             image.plot(legend.only = TRUE, zlim = c(minattr, 
                 maxattr), col = plotrix::color.scale(scale, c(0.3, 

@@ -1,42 +1,5 @@
-#######################################
-#GSOM - Growing Self Organizing Maps
-#train.r
-#26/10/16 - Alex Hunziker
-#######################################
-
-# The Functions in this File are required in order to train the gsom model.
-# gsom.train() is the main function, which should be called by the user.
-# The performance intensive loop has been outsourced to C for performance reasons.
-
-train.gsom <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, alpha, ...){
-  
-  # Normalizing the training or testdata (min/max) in order to balance the impact
-  # of the different properties of the dataframe
-  min <- apply(data, 2, function(x){min(x)})
-  max <- apply(data, 2, function(x){max(x)})
-  df <- t(apply(data, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
-  
-  t1 <- Sys.time()
-  gsom_model <- grow.gsom(gsom_model, df, iterations, spreadFactor)
-  t2 <- Sys.time()
-  print(t2-t1)
-  
-  norm_param <- data.frame(min = min, max = max)
-  gsom_model[["norm_param"]] <- norm_param
-  
-  if(keepdata==TRUE){
-    gsom_model[["data"]] = data
-  }
-  
-  class(gsom_model) = "gsom"
-  
-  return(gsom_model)
-  
-}
-
-
-#Mainly calls the C loop and processes returned data
-grow.gsom <- function(gsom_model, df, repet, spreadFactor){
+gsom.grow <-
+function(gsom_model, df, repet, spreadFactor){
   
   # Set some parameters
   lentr <- 10000
@@ -80,8 +43,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor){
             plentn = as.integer(lentn), #Max num of nodes
             plentd = as.integer(nrow(df)),
             currtrain = as.double(currtrain),
-            plentr = as.integer(lentr), #Max num of iterations
-            hex = as.integer(0)
+            plentr = as.integer(lentr) #Max num of iterations
   )
   
   training <- matrix(outc$currtrain, ncol=5)

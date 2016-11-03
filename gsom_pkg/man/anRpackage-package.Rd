@@ -1,24 +1,24 @@
-\name{gsom-package}
-\alias{gsom-package}
-\alias{gsom}
+\name{anRpackage-package}
+\alias{anRpackage-package}
+\alias{anRpackage}
 \docType{package}
 \title{
-\packageTitle{gsom}
+\packageTitle{anRpackage}
 }
 \description{
-\packageDescription{gsom}
+\packageDescription{anRpackage}
 }
 \details{
 
 The DESCRIPTION file:
-\packageDESCRIPTION{gsom}
-\packageIndices{gsom}
+\packageDESCRIPTION{anRpackage}
+\packageIndices{anRpackage}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{gsom}
+\packageAuthor{anRpackage}
 
-Maintainer: \packageMaintainer{gsom}
+Maintainer: \packageMaintainer{anRpackage}
 }
 \references{
 ~~ Literature or other references for background information ~~

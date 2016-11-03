@@ -1,14 +1,14 @@
-\name{gsom.train}
-\alias{gsom.train}
+\name{train.gsom}
+\alias{train.gsom}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+  Train
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-gsom.train(data, spreadFactor = 0.5, keepdata = FALSE, iterations = 50, alpha, ...)
+train.gsom(data, spreadFactor = 0.5, keepdata = FALSE, iterations = 50, alpha, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -72,10 +72,10 @@ function (data, spreadFactor = 0.5, keepdata = FALSE, iterations = 50,
         max(x)
     })
     df <- t(apply(data, 1, function(x) {
-        (x - min)/(max - min)
+        (x - min)/ifelse(max == min, 1, (max - min))
     }))
     t1 <- Sys.time()
-    gsom_model <- gsom.grow(gsom_model, df, iterations, spreadFactor)
+    gsom_model <- grow.gsom(gsom_model, df, iterations, spreadFactor)
     t2 <- Sys.time()
     print(t2 - t1)
     norm_param <- data.frame(min = min, max = max)
@@ -83,6 +83,7 @@ function (data, spreadFactor = 0.5, keepdata = FALSE, iterations = 50,
     if (keepdata == TRUE) {
         gsom_model[["data"]] = data
     }
+    class(gsom_model) = "gsom"
     return(gsom_model)
   }
 }

@@ -1,14 +1,15 @@
-\name{gsom.grow}
-\alias{gsom.grow}
+\name{grow.gsom}
+\alias{grow.gsom}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+  Grow the gsom model
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Internal Function that guides the growth and training of the gsom model. Not to be called by the user.
+  Any gsom model should be calculated by calling gsom().
 }
 \usage{
-gsom.grow(gsom_model, df, repet, spreadFactor)
+grow.gsom(gsom_model, df, repet, spreadFactor)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -61,7 +62,7 @@ function (gsom_model, df, repet, spreadFactor)
     lentr <- 10000
     lentn <- 10000
     lrinit <- 0.9
-    alpha <- 0.99
+    alpha <- 0.9
     radius <- 3
     df <- as.matrix(df)
     weights <- matrix(0, nrow = lentn, ncol = ncol(df))
@@ -90,7 +91,7 @@ function (gsom_model, df, repet, spreadFactor)
     weights <- weights[1:outc$plennd, ]
     colnames(weights) <- colnames(df)
     npos <- matrix(outc$npos, ncol = 2)
-    npos <- npos[1:outc$plennd, ]
+    npos <- matrix(npos[1:outc$plennd, ], ncol = 2)
     colnames(npos) <- c("x", "y")
     freq <- outc$freq[1:outc$plennd]
     distnd <- outc$distnd[1:outc$plennd]
@@ -100,6 +101,7 @@ function (gsom_model, df, repet, spreadFactor)
     GT = outc$gt
     gsom_model <- list(nodes = nodes, training = training, GT = GT, 
         norm_param = 0)
+    class(gsom_model) <- "gsom"
     return(gsom_model)
   }
 }

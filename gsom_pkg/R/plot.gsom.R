@@ -1,35 +1,16 @@
-#######################################
-#GSOM - Growing Self Organizing Maps
-#map.r
-#11/10/16 - Alex Hunziker
-#######################################
-
-# This function will plot the standard gsom plots, namely:
-#   -Count Frequency of nodes (count)
-#   -Distance within a node (dist)
-#   -Distance to neighbouring nodes (dist_neighbours)
-#   -Learning Process per Iteration (Average Mean Error) (training)
-#   -Plot of Properties (property)
-# Requires: a trained gsom model or mapped gsom data. Furthermore it requires
-#   the type of plot desired. For the property plot the dimension(s) to be 
-#   plotted can be indicated.
-# Returns: nothing
-
-plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
+plot.gsom <-
+function(gsom_object, type="count", dim=0, main=""){
   
   if(!exists("gsom_object")) stop("GSOM object (trained model or mapped data) has to be provided.")
   
   if(type == "count"){
     
-    hlim = max(max(gsom_object$nodes$position[, 1])-min(gsom_object$nodes$position[, 1]), 
-               max(gsom_object$nodes$position[, 2])-min(gsom_object$nodes$position[, 2]))/2 + 0.5
-    hx = (max(gsom_object$nodes$position[, 1])+min(gsom_object$nodes$position[, 1]))/2
-    hy = (max(gsom_object$nodes$position[, 2])+min(gsom_object$nodes$position[, 2]))/2
     par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
          type="n", main=paste("Density (Observations per unit)"), xlab="", ylab="", xaxt='n', yaxt='n',
-         xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
+         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$freq,c(0.9,0),c(0.9,0),c(0.9,1))
+    )
     symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
             circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
             add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$freq,c(0.9,0),c(0.9,0),c(0.9,1)))
@@ -91,23 +72,17 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     if(main == "") gennames = TRUE
     for(i in dim){ #should eventually be changed to colnames. For works there as well
       
-      if(exists("gennames")) main <- paste("Property:", colnames(gsom_object$nodes$weight[i]))
+      if(exists("gennames")) main <- paste("Property Nr:", i)
       
       minattr <- gsom_object$norm_param[i,1]
       maxattr <- gsom_object$norm_param[i,2]
       scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
       
-      hlim = max(max(gsom_object$nodes$position[, 1])-min(gsom_object$nodes$position[, 1]), 
-                 max(gsom_object$nodes$position[, 2])-min(gsom_object$nodes$position[, 2]))/2 + 0.5
-      hx = (max(gsom_object$nodes$position[, 1])+min(gsom_object$nodes$position[, 1]))/2
-      hy = (max(gsom_object$nodes$position[, 2])+min(gsom_object$nodes$position[, 2]))/2
-      
-      par(mar=c(5.1,4.1,4.1,5.5))
-      
       plot(gsom_object$nodes$position$x, 
            gsom_object$nodes$position$y, 
            type="n", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
-           xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
+           pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$weight[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95))
+      )
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
               add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$weight[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
