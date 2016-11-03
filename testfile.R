@@ -49,7 +49,7 @@ Sys.sleep(1)
 
 # TEST 6a:
 # Should return 5 nodes. Noise in data included.
-gsom_model <- train.gsom(checkdfs[[6]], keepdata = FALSE, iterations = 50, spreadFactor = 0.05, alpha = 0.5)
+gsom_model <- train.gsom(checkdfs[[6]], keepdata = FALSE, iterations = 50, spreadFactor = 0.01, alpha = 0.5)
 plot(gsom_model, type="property", main="Test6a")
 if(nrow(gsom_model$nodes$position) != 5) warning(paste("Test 6a returned unexpected amount of nodes (5 were expected): ", nrow(gsom_model$nodes$position)))
 Sys.sleep(1)
@@ -69,6 +69,48 @@ print("Test 7: Random data. Should return some kind of order for some of the dim
 plot(gsom_model, type="property", main="Test7")
 if(gsom_model$training$meandist[50] > 0.01) warning(paste0("Distance for Test 7 is ", gsom_model$training$meandist[50], ", which is rather high for this kind of data"))
 
-rm(gsom_model, checkdfs)
-
 print("test run complete.")
+warnings()
+print("Now launching benchmark...")
+Sys.sleep(2)
+
+###
+###Benchmark Section
+###
+
+# Make SOM with kohonen package
+require(kohonen)
+grid <- somgrid(20, 20, topo = "rectangular")
+kohonen <- som(checkdfs[[6]], grid=grid, rlen=100)
+for(i in 1:6) plot(kohonen, type="property", property=kohonen$codes[,i])
+Sys.sleep(2)
+
+# Make SOM with gsom Package
+n_som <- train.gsom(checkdfs[[6]], keepdata = FALSE, iterations = 100, spreadFactor = 0.92, alpha = 0.5, gridsize = 20)
+plot(n_som , type="property", main="Benchmark: nSOM")
+Sys.sleep(2)
+
+# Make GSOM with "high" SpreadFactor
+l_gsom <- train.gsom(checkdfs[[6]], keepdata = FALSE, iterations = 100, spreadFactor = 0.999, alpha = 0.5, gridsize = FALSE)
+plot(l_gsom, type="property", main="Benchmark: l_GSOM")
+Sys.sleep(2)
+
+# Make GSOM with "low" SpreadFactor
+s_gsom <- train.gsom(checkdfs[[6]], keepdata = FALSE, iterations = 100, spreadFactor = 0.95, alpha = 0.5, gridsize = FALSE)
+plot(s_gsom, type="property", main="Benchmark: s_GSOM")
+Sys.sleep(2)
+
+# Compare
+print(paste("Kohonen map has: 400 nodes and an average Distance of", kohonen$changes[100]))
+print(paste("SOM fixt size map has: 400 nodes and an average Distance of", n_som$training$meandist[100]))
+print(paste("GSOM large size map has:", nrow(l_gsom$nodes$position), "nodes and an average Distance of", l_gsom$training$meandist[100]))
+print(paste("SOM fixt size map has:", nrow(s_gsom$nodes$position), "nodes and an average Distance of", s_gsom$training$meandist[100]))
+
+if(s_gsom$training$meandist[100] < s_gsom$training$meandist[100]) warning("Benchmark Warning: Larger GSOM does not have smaller distance")
+if(nrow(s_gsom$nodes$position) > nrow(l_gsom$nodes$position)) warning("Benchmark Warning: Spreading Factor seems not to increase node quantity.")
+if(l_gsom$training$meandist[100] > n_som$training$meandist[100]) warning("Benchmark Information: Normal SOM Performs better thatn GSOM with high N of nodes.")
+if(kohonen$changes[100] < n_som$training$meandist[100]/2) warning("Benchmark Warning: Normal SOM algorithm is notably worse than the kohonen benchmark.")
+
+rm(gsom_model, checkdfs, l_gsom, s_gsom, n_som, kohonen)
+print("End of benchmark. Please check warnings, if any.")
+

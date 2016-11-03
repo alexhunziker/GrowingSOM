@@ -8,7 +8,7 @@
 # gsom.train() is the main function, which should be called by the user.
 # The performance intensive loop has been outsourced to C for performance reasons.
 
-train.gsom <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, alpha, ...){
+train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, alpha=0.5, gridsize = FALSE, nhood= "rect", ...){
   
   # Normalizing the training or testdata (min/max) in order to balance the impact
   # of the different properties of the dataframe
@@ -16,8 +16,16 @@ train.gsom <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, al
   max <- apply(data, 2, function(x){max(x)})
   df <- t(apply(data, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
   
+  if(gridsize==FALSE) grow=1
+  else grow=2
+  
+  if(gridsize == FALSE) gridsize=2
+  else if(!is.numeric(gridsize)){
+    error("Grid size must be nummeric (for classical kohonen map) or FALSE (for Growing SOM).")
+  }
+  
   t1 <- Sys.time()
-  gsom_model <- grow.gsom(gsom_model, df, iterations, spreadFactor)
+  gsom_model <- grow.gsom(gsom_model, df, iterations, spreadFactor, alpha, gridsize, nhood, grow)
   t2 <- Sys.time()
   print(t2-t1)
   
@@ -36,7 +44,7 @@ train.gsom <- function(data, spreadFactor=0.5, keepdata=FALSE, iterations=50, al
 
 
 #Mainly calls the C loop and processes returned data
-grow.gsom <- function(gsom_model, df, repet, spreadFactor){
+grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhood, grow){
   
   # Set some parameters
   lentr <- 10000
@@ -45,11 +53,14 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor){
   lrinit <- 0.9
   alpha <- 0.9 #Learning Rate Depreciation factor.
   radius <- 3 #Initial Radius. Missing feature.
+  if(grow==2) radius = sqrt(gridsize)
+  
+  initnodes <- gridsize*gridsize
   
   df <- as.matrix(df)
   
   weights <- matrix(0, nrow=lentn, ncol=ncol(df))
-  weights[1:4,] <- runif(4*ncol(df))
+  weights[1:initnodes,] <- runif(initnodes*ncol(df))
   
   distnd <- rep(0, lentn) #Error per node
   freq <- rep(0, lentn) #Frequ of nodes
@@ -57,7 +68,18 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor){
   gt = -ncol(df) * log(spreadFactor) * 0.01*nrow(df)
   
   npos <- matrix(0, nrow=lentn, ncol=2)
-  npos[1:4,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
+  #npos[1:initnodes,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
+  if(nhood=="rect"){
+    for(i in 1:gridsize){
+      for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i, j)
+    }
+  }else{
+    for(i in 1:gridsize){
+      if(i/2 - rounded(i/2,0) != 0) q=0.5
+      else q=0
+      for(j in 1:gridsize) npos[gridsize*(i-1)*j,] = c(i+q, j)
+    }
+  }
   
   if(repet > lentr) error("Max nr of iterations exceeded.")
   
@@ -69,7 +91,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor){
             distnd = as.double(distnd),
             prep = as.integer(repet), #repetitions
             plendf = as.integer(nrow(df)),
-            plennd = as.integer(4),
+            plennd = as.integer(initnodes),
             plrinit = as.double(lrinit),
             freq = as.double(freq),
             alpha = as.double(alpha), #for lr depreciation
@@ -81,7 +103,8 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor){
             plentd = as.integer(nrow(df)),
             currtrain = as.double(currtrain),
             plentr = as.integer(lentr), #Max num of iterations
-            hex = as.integer(0)
+            hex = as.integer(0),
+            grow = as.integer(grow)
   )
   
   training <- matrix(outc$currtrain, ncol=5)

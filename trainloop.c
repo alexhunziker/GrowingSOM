@@ -24,7 +24,7 @@ void print_ll(struct adjust *root);
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
 		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
-		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex){
+		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow){
 
 	//Convert pointers
 	int rep = *prep, lendf = *plendf, lennd = *plennd, dim = *pdim;
@@ -52,7 +52,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 	totiter = rep * lendf;
 
-	phase = 1;
+	phase = *grow;
 
 	// Loop over iterations of the input data
 	for(i = 0; i<rep; i++){
