@@ -111,6 +111,5 @@ if(nrow(s_gsom$nodes$position) > nrow(l_gsom$nodes$position)) warning("Benchmark
 if(l_gsom$training$meandist[100] > n_som$training$meandist[100]) warning("Benchmark Information: Normal SOM Performs better thatn GSOM with high N of nodes.")
 if(kohonen$changes[100] < n_som$training$meandist[100]/2) warning("Benchmark Warning: Normal SOM algorithm is notably worse than the kohonen benchmark.")
 
-rm(gsom_model, checkdfs, l_gsom, s_gsom, n_som, kohonen)
 print("End of benchmark. Please check warnings, if any.")
 

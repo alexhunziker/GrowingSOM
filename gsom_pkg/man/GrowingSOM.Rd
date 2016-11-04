@@ -1,24 +1,24 @@
-\name{anRpackage-package}
-\alias{anRpackage-package}
-\alias{anRpackage}
+\name{GrowingSOM}
+\alias{GSOM}
+\alias{GrowingSelfOrganizingMap}
 \docType{package}
 \title{
-\packageTitle{anRpackage}
+\packageTitle{GrowingSOM}
 }
 \description{
-\packageDescription{anRpackage}
+\packageDescription{GrowingSOM}
 }
 \details{
 
 The DESCRIPTION file:
-\packageDESCRIPTION{anRpackage}
-\packageIndices{anRpackage}
+\packageDESCRIPTION{GrowingSOM}
+\packageIndices{GrowingSOM}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{anRpackage}
+\packageAuthor{GrowingSOM}
 
-Maintainer: \packageMaintainer{anRpackage}
+Maintainer: \packageMaintainer{GrowingSOM}
 }
 \references{
 ~~ Literature or other references for background information ~~
