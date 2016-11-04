@@ -10,7 +10,7 @@
 # Returns: mapped_data, which includes the nodes with position of nodes, frequency and average errors
 #   as well as the error and winning node for each node of the testdata
 
-gsom.map <- function(df, gsom_model, retaindata=FALSE){
+map.gsom <- function(gsom_model, df, retaindata=FALSE){
   
   # Normalizing the training or testdata (min/max) in order to balance the impact
   # of the different properties of the dataframe

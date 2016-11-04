@@ -4,7 +4,7 @@
 
 # More pseudocode than anything else
 
-gsom.predict <- function(df, gsom_model, retaindata=FALSE){
+predict.gsom <- function(gsom_model, df, retaindata=FALSE){
   
   #if(!gsom_model[["dep_val"]]) error("Wrong input, use trained gsom model for dependent values.")
   

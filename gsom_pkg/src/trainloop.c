@@ -15,16 +15,16 @@ struct adjust{
 	struct adjust *next;
 };
 
-int ax[4] = {0, 0, 1, -1};
-int ay[4] = {1, -1, 0, 0};
+double ax[6] = {0, 0, 1, -1, 0, 0};
+double ay[6] = {1, -1, 0, 0, 0, 0};
 
-struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate);
+struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w);
 void clear_ll(struct adjust *root);
 void print_ll(struct adjust *root);
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
 		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
-		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr){
+		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow){
 
 	//Convert pointers
 	int rep = *prep, lendf = *plendf, lennd = *plennd, dim = *pdim;
@@ -37,16 +37,22 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 	double min, max, meandist, adrate, q;
 	struct adjust *nneigh, *nonneigh;
 	double dist, tmp, dm, lr, errorsum, radius;
-	int nodegrow, x;
+	int nodegrow, x, w=4;
 	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
 	double sr = 0.5;
+	
+	if(*hex==1){
+	  w=6;
+	  memcpy(ax, (double [6]){1.00, -1.00, 0.50, -0.50, 0.50, -0.50}, 6*sizeof(double));
+	  memcpy(ay, (double [6]){0.00, -0.00, 0.75, 0.75, -0.75, -0.75}, 6*sizeof(double));
+	}
 
 	//Prepare LL
 	root = (struct adjust *) malloc( sizeof(struct adjust) );
 
 	totiter = rep * lendf;
 
-	phase = 1;
+	phase = *grow;
 
 	// Loop over iterations of the input data
 	for(i = 0; i<rep; i++){
@@ -69,7 +75,6 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		//   the phase 2.
 		if(phase == 1) lr = lrinit;
 		else lr = lrinit - (double)i/(double)rep*lrinit;
-		printf("lr=%f, phase=%d, radius=%f\n", lr, phase, radius);
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -129,7 +134,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			for(n = radius; n >= 1; n--){
 
 				adrate = (double)n/(radius+1.0);
-				tnode = get_neighbours(npos, lennd, lentn, root, adrate);
+				tnode = get_neighbours(npos, lennd, lentn, root, adrate, w);
 				current = root;
 				while(current -> next != NULL) current = current -> next;
 				current -> next = tnode;
@@ -165,9 +170,9 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 				current = root;
 
-				if(tmp > 4){
+				if(tmp > w){
 
-					//Node has 4 direct neighbours. Growth is not possible.
+					//Node has w direct neighbours. Growth is not possible.
 					//Therefore the error is spread to neighbouring units.
 					distnd[nearest] = distnd[nearest] / 2;
 					for(l=1; l < 5; l++){
@@ -183,8 +188,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 					// Update counter for phase change.
 					nodegrow += 1;
 
-					//Check for growth on all 4 sides of nearest
-					for(l=0; l<4; l++){
+					//Check for growth on all w sides of nearest
+					for(l=0; l<w; l++){
 
 						//If tmp remains 0, an empty spot for a new node was found.
 						tmp = 0;
@@ -210,7 +215,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 							newnode -> next = NULL;
 							newnode -> nodeid = lennd-1;
 
-							nneigh = get_neighbours(npos, lennd, lentn, newnode, 0);
+							nneigh = get_neighbours(npos, lennd, lentn, newnode, 0, w);
 
 							clear_ll(newnode);
 
@@ -231,7 +236,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 								newnode_f -> next = NULL;
 								newnode_f -> nodeid = nearest;
 
-								nonneigh = get_neighbours(npos, lennd, lentn, newnode_f, 0);
+								nonneigh = get_neighbours(npos, lennd, lentn, newnode_f, 0, w);
 								clear_ll(newnode_f);
 
 								//Sanity Check for debugging reasons
@@ -255,7 +260,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 									}
 
 									//...Determine if case A applies, tmp stores the relevant nodeid
-									for(o=0; o < 4; o++){
+									for(o=0; o < w; o++){
 										if(npos[hptr -> nodeid] == npos[lennd-1] + ax[o]*2 && npos[hptr -> nodeid + lentn] == npos[lennd-1 + lentn] + ay[o]*2 ) tmp = hptr -> nodeid;
 									}
 
@@ -410,7 +415,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 //This function searches for the neighbourhood of a node (required as struct adjust)
 //Requires: Origin (struct adjust), Lenght of Nodes, Lenght of node Data Structure, Pointer to npos, and the adrate for the new points
 //Duplicates (that already esixist in Origin) are sorted out and not returned. The returned LL only contains new elements, and a Pointer
-struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate){
+struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w){
 
 	struct adjust *nroot, *tmp;
 	int isneighbour, exclude;
@@ -429,7 +434,7 @@ struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust 
 			isneighbour = 0;
 
 			//Check if the element is a neighbour
-			for(m=0; m < 4; m++){
+			for(m=0; m < w; m++){
 
 				if(npos[l] == npos[origin -> nodeid] + ax[m] && npos[l + lentn] == npos[origin -> nodeid + lentn] + ay[m])
 					isneighbour = 1;

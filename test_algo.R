@@ -7,9 +7,12 @@
 
 #setwd("Q:/Abteilungsprojekte/eng/SWWData/Alex/gsom")
 setwd("~/gsom")
-source("main.r")
 
-load("~/gsom/checkdfs.RData")
+install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
+library(GrowingSOM)
+
+data("simple_sampledata")
+checkdfs <- simple_sampledata
 
 # TEST 1:
 # Must return 1 node.
@@ -49,7 +52,7 @@ Sys.sleep(1)
 
 # TEST 6a:
 # Should return 5 nodes. Noise in data included.
-gsom_model <- train.gsom(checkdfs[[6]], keepdata = FALSE, iterations = 50, spreadFactor = 0.01, alpha = 0.5)
+gsom_model <- train.gsom(checkdfs[[6]], keepdata = FALSE, iterations = 50, spreadFactor = 0.05, alpha = 0.5)
 plot(gsom_model, type="property", main="Test6a")
 if(nrow(gsom_model$nodes$position) != 5) warning(paste("Test 6a returned unexpected amount of nodes (5 were expected): ", nrow(gsom_model$nodes$position)))
 Sys.sleep(1)
