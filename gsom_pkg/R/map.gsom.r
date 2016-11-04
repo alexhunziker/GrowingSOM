@@ -35,18 +35,16 @@ map.gsom <- function(gsom_model, df, retaindata=FALSE){
   
   dist <- outc$ndist
   code <- outc$codes
-  print(code)
 
   gsom_mapped = list();
   gsom_mapped[["nodes"]] = gsom_model$nodes
   gsom_mapped[["nodes"]]$error = NULL
   gsom_mapped[["nodes"]]$freq = outc$freq
   gsom_mapped[["mapped"]] = data.frame(codes=code, dist=dist)
-  gsom_mapped[["predict"]] = predict
   gsom_mapped[["norm_param"]] = gsom_model$scale
   if(retaindata) gsom_mapped[["data"]] == df;
   
-  class(gsom_mapped) = "gsom_mapped"
+  class(gsom_mapped) = "gsom"
   
   return(gsom_mapped)
   

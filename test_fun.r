@@ -9,15 +9,19 @@
 
 #setwd("Q:/Abteilungsprojekte/eng/SWWData/Alex/gsom")
 setwd("~/gsom")
-source("main.r")
+
+install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
+library(GrowingSOM)
 
 # Load Data
 #load("Q:/Abteilungsprojekte/eng/SWWData/Alex/Validation/SBR_raw.RData")
 load("/media/SWW/Alex/Validation/SBR_raw.RData")
+#data("complex_sampledata")
+
 testdf <- testdata$n_07_06[,3:ncol(testdata$n_07_06)]
 testdf2 <- testdata$k_171819_05[1:6000,3:ncol(testdata$n_07_06)]
 testdf2[7] <- 0
-traindata <- traindata[1:50000,3:ncol(traindata)]
+traindata <- traindata[1:5000,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- train.gsom(traindata, 
@@ -25,9 +29,9 @@ gsom_model <- train.gsom(traindata,
                          spreadFactor = 0.9, alpha = 0.5)
 
 # Map data
-mapped_realdata <- gsom.map(traindata, gsom_model)
-mapped_testdata <- gsom.map(testdf, gsom_model)
-mapped_testdata2 <- gsom.map(testdf2, gsom_model)
+mapped_realdata <- map(gsom_model, traindata)
+mapped_testdata <- map(gsom_model, testdf, retaindata = TRUE)
+mapped_testdata2 <- map(gsom_model, testdf2)
 
 # Plot
 plot(gsom_model)
@@ -36,7 +40,7 @@ plot(gsom_model, type="property", dim=8, main="Testplot")
 plot(gsom_model, type="training")
 plot(gsom_model, type="dist")
 
-predicted <- gsom.predict(traindata, gsom_model, retaindata=TRUE)
+predicted <- predict(gsom_model, traindata, retaindata=TRUE)
 
 plot(mapped_realdata)
 plot(mapped_testdata)
