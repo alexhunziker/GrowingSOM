@@ -9,6 +9,7 @@
 setwd("~/gsom")
 
 install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
+detach("package:GrowingSOM", unload=TRUE)
 library(GrowingSOM)
 
 data("simple_sampledata")

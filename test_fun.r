@@ -11,12 +11,19 @@
 setwd("~/gsom")
 
 install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
+detach("package:GrowingSOM", unload=TRUE)
 library(GrowingSOM)
 
 # Load Data
 #load("Q:/Abteilungsprojekte/eng/SWWData/Alex/Validation/SBR_raw.RData")
 load("/media/SWW/Alex/Validation/SBR_raw.RData")
 #data("complex_sampledata")
+
+# for loading wines...
+require(kohonen)
+data("wines")
+training.wines <- sample(nrow(wines), 120)
+test.wines <- wines[-training,]
 
 testdf <- testdata$n_07_06[,3:ncol(testdata$n_07_06)]
 testdf2 <- testdata$k_171819_05[1:6000,3:ncol(testdata$n_07_06)]
@@ -27,6 +34,8 @@ traindata <- traindata[1:5000,3:ncol(traindata)]
 gsom_model <- train.gsom(traindata, 
                          keepdata = FALSE, iterations = 50, 
                          spreadFactor = 0.9, alpha = 0.5)
+
+supervised_gsom <- train_xy.gsom(training.wines, wine.classes[training.wines])
 
 # Map data
 mapped_realdata <- map(gsom_model, traindata)
