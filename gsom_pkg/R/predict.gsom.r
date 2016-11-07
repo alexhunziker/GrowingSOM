@@ -12,6 +12,7 @@ predict.gsom <- function(gsom_model, df, retaindata=FALSE){
   # of the different properties of the dataframe
   min <- gsom_model$norm_param$min
   max <- gsom_model$norm_param$max
+  df <- as.matrix(df)
   df <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
   
   codes <- rep(0, times=nrow(df))
