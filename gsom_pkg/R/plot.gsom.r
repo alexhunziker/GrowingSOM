@@ -118,6 +118,42 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     
     par(mar=c(5.1,4.1,4.1,2.1))
     
+  } else if(type == "predict") {
+    
+    par(mar=c(5.1,4.1,4.1,5.5))
+    if(any(dim > ncol(gsom_object$nodes$predict))) stop("Invalid value for parameter dim.")
+    if(dim == 0) dim <- c(1:ncol(gsom_object$nodes$predict))
+    
+    if(main == "") gennames = TRUE
+    for(i in dim){ #should eventually be changed to colnames. For works there as well
+      
+      if(exists("gennames")) main <- paste("Prediction:", colnames(gsom_object$nodes$predict[i]))
+      
+      minattr <- gsom_object$norm_param[i,3]
+      maxattr <- gsom_object$norm_param[i,4]
+      scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
+      
+      hlim = max(max(gsom_object$nodes$position[, 1])-min(gsom_object$nodes$position[, 1]), 
+                 max(gsom_object$nodes$position[, 2])-min(gsom_object$nodes$position[, 2]))/2 + 0.5
+      hx = (max(gsom_object$nodes$position[, 1])+min(gsom_object$nodes$position[, 1]))/2
+      hy = (max(gsom_object$nodes$position[, 2])+min(gsom_object$nodes$position[, 2]))/2
+      
+      par(mar=c(5.1,4.1,4.1,5.5))
+      
+      plot(gsom_object$nodes$position$x, 
+           gsom_object$nodes$position$y, 
+           type="n", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
+           xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
+      symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
+              circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
+              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$predict[,i],c(1,1),c(1,0.1),c(1,0.1)))
+      image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
+                 col=plotrix::color.scale(scale,c(1,1),c(1,0.1),c(1,0.1)))
+      
+    }
+    
+    par(mar=c(5.1,4.1,4.1,2.1))
+    
   } else {
     
     stop("Invalid value for parameter type.")

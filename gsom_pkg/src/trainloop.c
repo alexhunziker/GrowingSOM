@@ -21,6 +21,9 @@ double ay[6] = {1, -1, 0, 0, 0, 0};
 struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w);
 void clear_ll(struct adjust *root);
 void print_ll(struct adjust *root);
+void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
+                       Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
+                       Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow, double *y, Sint *leny, Sint *pydim, double *predict);
 
 void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
 		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,

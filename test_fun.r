@@ -10,6 +10,7 @@
 #setwd("Q:/Abteilungsprojekte/eng/SWWData/Alex/gsom")
 setwd("~/gsom")
 
+remove.packages("GrowingSOM", lib="~/R/x86_64-pc-linux-gnu-library/3.2")
 install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
 detach("package:GrowingSOM", unload=TRUE)
 library(GrowingSOM)
@@ -23,7 +24,11 @@ load("/media/SWW/Alex/Validation/SBR_raw.RData")
 require(kohonen)
 data("wines")
 training.wines <- sample(nrow(wines), 120)
-test.wines <- wines[-training,]
+test.wines <- wines[-training.wines,] #wrong
+
+data(iris)
+iris[,5] <- as.numeric(iris[,5])
+iris[,6] <- iris[,5]^2   #to test 2 dependent variables.
 
 testdf <- testdata$n_07_06[,3:ncol(testdata$n_07_06)]
 testdf2 <- testdata$k_171819_05[1:6000,3:ncol(testdata$n_07_06)]
@@ -35,7 +40,8 @@ gsom_model <- train.gsom(traindata,
                          keepdata = FALSE, iterations = 50, 
                          spreadFactor = 0.9, alpha = 0.5)
 
-supervised_gsom <- train_xy.gsom(training.wines, wine.classes[training.wines])
+supervised_gsom <- train_xy.gsom(wines[training.wines,], wine.classes[training.wines], spreadFactor = 0.99)
+supervised_gsom2 <- train_xy.gsom(iris[,1:4], iris[,5:6], spreadFactor = 0.99)
 
 # Map data
 mapped_realdata <- map(gsom_model, traindata)
@@ -49,7 +55,17 @@ plot(gsom_model, type="property", dim=8, main="Testplot")
 plot(gsom_model, type="training")
 plot(gsom_model, type="dist")
 
-predicted <- predict(gsom_model, traindata, retaindata=TRUE)
+plot(supervised_gsom, type="property")
+plot(supervised_gsom, type="predict")
+predicted <- predict(supervised_gsom, test.wines, retaindata=TRUE)
+compare <- cbind(wine.classes[-training.wines], (predicted$prediction$predict)*(supervised_gsom$norm_param$maxy[1:1]-supervised_gsom$norm_param$miny[1:1])+supervised_gsom$norm_param$miny[1:1])
+print(compare)
+
+plot(supervised_gsom2, type="property")
+plot(supervised_gsom2, type="predict")
+predicted2 <- predict(supervised_gsom2, iris[,5:6], retaindata=TRUE)
+compare <- cbind(iris[,5:6], predicted2$prediction[,3:4])
+print(compare)
 
 plot(mapped_realdata)
 plot(mapped_testdata)
@@ -58,3 +74,6 @@ plot(mapped_testdata2)
 
 # Summary
 summary(gsom_model)
+#summary(supervised_gsom)
+#summary(mapped_testdata)
+#summary(predicted)

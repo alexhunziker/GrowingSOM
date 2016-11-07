@@ -9,8 +9,8 @@
 # The performance intensive loop has been outsourced to C for performance reasons.
 
 #Mainly calls the C loop and processes returned data
-grow.gsom <- function(gsom_model, y, df, repet, spreadFactor, alpha, gridsize, nhood, grow){
-  
+grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, grow){
+
   # Set some parameters
   lentr <- 10000
   lentn <- 10000
@@ -54,6 +54,10 @@ grow.gsom <- function(gsom_model, y, df, repet, spreadFactor, alpha, gridsize, n
   if(repet > lentr) error("Max nr of iterations exceeded.")
   
   currtrain <- matrix(0, nrow=lentr, ncol=5)
+  
+  as.integer(nrow(y))
+  as.integer(ncol(y))
+  as.double(predict)
   
   outc = .C("som_train_loop_xy",
             df = as.double(df),
@@ -103,6 +107,7 @@ grow.gsom <- function(gsom_model, y, df, repet, spreadFactor, alpha, gridsize, n
   nodes <- list(
     position = data.frame(npos),
     weight = data.frame(weights),
+    predict = data.frame(predict),
     error = distnd,
     freq = freq
   )

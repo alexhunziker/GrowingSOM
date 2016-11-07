@@ -1,5 +1,5 @@
 ////////////////////////////////////////
-//trainloop.c - part of GSOM.r
+//trainloop_xy.c - part of GSOM.r
 //Alex Hunziker - 17.10.2016
 ////////////////////////////////////////
 
@@ -15,12 +15,11 @@ struct adjust{
   struct adjust *next;
 };
 
-double ax[6] = {0, 0, 1, -1, 0, 0};
-double ay[6] = {1, -1, 0, 0, 0, 0};
+extern double ax[];
+extern double ay[];
 
-struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w);
-void clear_ll(struct adjust *root);
-void print_ll(struct adjust *root);
+struct adjust *get_neighbours_xy(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w);
+void clear_ll_xy(struct adjust *root);
 
 void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
 		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
@@ -41,7 +40,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
 	double sr = 0.5;
 
-	if(*leny != lendf) error("matrixes must have the same number of rows");
+	if(*leny != lendf) error("%d, %d, matrixes must have the same number of rows", (int)*leny, lendf);
 	
 	if(*hex==1){
 	  w=6;
@@ -140,7 +139,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 			for(n = radius; n >= 1; n--){
 
 				adrate = (double)n/(radius+1.0);
-				tnode = get_neighbours(npos, lennd, lentn, root, adrate, w);
+				tnode = get_neighbours_xy(npos, lennd, lentn, root, adrate, w);
 				current = root;
 				while(current -> next != NULL) current = current -> next;
 				current -> next = tnode;
@@ -225,9 +224,9 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 							newnode -> next = NULL;
 							newnode -> nodeid = lennd-1;
 
-							nneigh = get_neighbours(npos, lennd, lentn, newnode, 0, w);
+							nneigh = get_neighbours_xy(npos, lennd, lentn, newnode, 0, w);
 
-							clear_ll(newnode);
+							clear_ll_xy(newnode);
 
 							//Set new weights for the new node. 4 Cases (A, B, C & D are considered)
 							if(nneigh -> next != NULL){
@@ -249,8 +248,8 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 								newnode_f -> next = NULL;
 								newnode_f -> nodeid = nearest;
 
-								nonneigh = get_neighbours(npos, lennd, lentn, newnode_f, 0, w);
-								clear_ll(newnode_f);
+								nonneigh = get_neighbours_xy(npos, lennd, lentn, newnode_f, 0, w);
+								clear_ll_xy(newnode_f);
 
 								//Sanity Check for debugging reasons
 								if(nneigh-> nodeid != nearest) error("Topology of the GSOM is broken...");
@@ -357,11 +356,11 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 
 								}
 
-								clear_ll(nonneigh);
+								clear_ll_xy(nonneigh);
 
 							}
 
-							clear_ll(nneigh);
+							clear_ll_xy(nneigh);
 
 						}
 
@@ -377,7 +376,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 			}
 
 			//Element j has been checked. Reset LL.
-			clear_ll(root);
+			clear_ll_xy(root);
 			root = malloc(sizeof(struct adjust));
 
 		}
@@ -456,7 +455,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 //This function searches for the neighbourhood of a node (required as struct adjust)
 //Requires: Origin (struct adjust), Lenght of Nodes, Lenght of node Data Structure, Pointer to npos, and the adrate for the new points
 //Duplicates (that already esixist in Origin) are sorted out and not returned. The returned LL only contains new elements, and a Pointer
-struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w){
+struct adjust *get_neighbours_xy(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w){
   
   struct adjust *nroot, *tmp;
   int isneighbour, exclude;
@@ -512,5 +511,16 @@ struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust 
   
   return nroot;
   
+}
+
+// House keeping, to avoid memory leaks.
+void clear_ll_xy(struct adjust *root){
+  struct adjust *tmp;
+  while(root != NULL){
+    tmp = root;
+    root = root -> next;
+    free(tmp);
+  }
+  return;
 }
 
