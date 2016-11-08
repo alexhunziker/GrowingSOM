@@ -12,7 +12,7 @@ setwd("~/gsom")
 
 remove.packages("GrowingSOM", lib="~/R/x86_64-pc-linux-gnu-library/3.2")
 install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
-detach("package:GrowingSOM", unload=TRUE)
+try(detach("package:GrowingSOM", unload=TRUE), silent = TRUE)
 library(GrowingSOM)
 
 # Load Data

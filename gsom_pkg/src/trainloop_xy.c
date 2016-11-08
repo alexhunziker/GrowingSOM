@@ -46,6 +46,10 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 	  w=6;
 	  memcpy(ax, (double [6]){1.00, -1.00, 0.50, -0.50, 0.50, -0.50}, 6*sizeof(double));
 	  memcpy(ay, (double [6]){0.00, -0.00, 0.75, 0.75, -0.75, -0.75}, 6*sizeof(double));
+	} else {		
+		w=4;		
+		memcpy(ax, (double [6]){0.0, 0.0, 1.0, -1.0, 0.0, 0.0}, 6*sizeof(double));		
+		memcpy(ay, (double [6]){1.0, -1.0, 0.0, 0.0, 0.0, 0.0}, 6*sizeof(double));
 	}
 
 	//Prepare LL
@@ -80,6 +84,8 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
 
+			R_CheckUserInterrupt();	
+			
 			//Select Random observation
 			x = ((lendf-1) * unif_rand());
 
@@ -166,7 +172,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 			if(distnd[nearest] > *gt && phase == 1){
 
 				//Determine if maximum size of net is reached
-				if(!(lentn-1 > lennd)) error("Number of nodes exceeded maximum capacity. Consider adjusting max gridsize or reducing Spreading Factor.");
+				if(!(lentn-5 > lennd)) error("Number of nodes exceeded maximum capacity. Consider adjusting max gridsize or reducing Spreading Factor.");
 
 				//Determine the number of direct neighbours.
 				//This is kind of hacky...
@@ -184,7 +190,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 					//Node has w direct neighbours. Growth is not possible.
 					//Therefore the error is spread to neighbouring units.
 					distnd[nearest] = distnd[nearest] / 2;
-					for(l=1; l < 5; l++){
+					for(l=1; l < w+1; l++){
 
 						current = current -> next;
 						// Paper suggests values between 0 and 1
@@ -257,6 +263,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 								//Check the neighbours of nearest...
 								hptr = nonneigh;
 								tmp = -1;
+								prev = hptr;
 								while(hptr != NULL){
 
 									//...Remove new node from list
@@ -265,10 +272,12 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 										if(hptr2 != NULL){
 											hptr -> nodeid = hptr2 -> nodeid;
 											hptr -> next = hptr2 -> next;
+											free(hptr2);
 										} else {
 											prev -> next = NULL;
+											//free(hptr); #memory leak?		
+											//hptr = NULL;
 										}
-										free(hptr2);
 									}
 
 									//...Determine if case A applies, tmp stores the relevant nodeid
@@ -427,7 +436,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 			phase = 2;
 		}
 
-		printf("| ");
+		/*printf("| ");
 		tmp = (double)i/(double)rep*20;
 		for(j=0; j!=20; j++){
 			if(tmp>0){
@@ -437,11 +446,13 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 				printf(" ");
 			}
 		}
-		printf(" |\n");
+		printf(" |\n");*/
+		printf(".");
 
 	}
 
 	//Iteration i is completed
+	printf("\n");
 
 	//Update Return Values
 	*plennd = lennd;

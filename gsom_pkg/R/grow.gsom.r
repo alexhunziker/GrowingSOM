@@ -44,7 +44,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
     for(i in 1:gridsize){
       if(i/2 - round(i/2,0) != 0) q=0.5
       else q=0
-      for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i+q, j)
+      for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i+q, (j+q)*1.50)
     }
   }
   

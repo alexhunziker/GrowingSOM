@@ -47,7 +47,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
     for(i in 1:gridsize){
       if(i/2 - rounded(i/2,0) != 0) q=0.5
       else q=0
-      for(j in 1:gridsize) npos[gridsize*(i-1)*j,] = c(i+q, j)
+      for(j in 1:gridsize) npos[gridsize*(i-1)*j,] = c(i+q, (j+q)*1.5)
     }
   }
   
