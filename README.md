@@ -6,42 +6,44 @@ __Damminda Alahakoon, Saman K. Halgamuge (2000)__: Dynamic Self-Organizing Maps 
 
 ## Functionality
 
-### train()
+### train.gsom
 Generates and trains a new gsom model according to a numeric data.frame or matrix.
 
-### map()
+### train_xy.gsom
+Supervised learning version of train.gsom
+
+### map.gsom
 Maps testdata onto a trained gsom_model.
 
-### summary()
+### predict.gsom
 Provides a summary of a gsom_model.
 
-### plot()
+### plot.gsom
 Prints a gsom_model.
 
-### cont_train()
-Train an existing model with continuously new data.
+### summary.gsom 
+Summarizes gsom 
 
-### predict()
-Missing feature
-
-### train_dept()
-Missing feature
+### print.gsom
+Prints gsom
 
 ### 
 
-## Technical Stuff
+## Installation
 In order to use the functionality, the file ``main.r`` has to be loaded.
 
-Current code includes a c file that needs to be compiled in order to run the code. In order to compile the file execute
+Build R package
 
 ```bash
-	R CMD SHLIB trainloop.r
+	R CMD build gsom-pkg
 ```
 
-Required R Libraries:
+Compile / Install up in R:
 ```r
-	install.packages("fields")
-	install.packages("plotrix")
+    remove.packages("GrowingSOM", lib="~/R/x86_64-pc-linux-gnu-	library/3.2")
+    install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
+    detach("package:GrowingSOM", unload=TRUE)
+    library(GrowingSOM)
 ```
 
 ## Remarks
