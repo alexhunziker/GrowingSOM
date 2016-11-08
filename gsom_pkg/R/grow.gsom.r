@@ -35,14 +35,16 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
   npos <- matrix(0, nrow=lentn, ncol=2)
   #npos[1:initnodes,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
   if(nhood=="rect"){
+    hex = 0
     for(i in 1:gridsize){
       for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i, j)
     }
   }else{
+    hex = 1
     for(i in 1:gridsize){
-      if(i/2 - rounded(i/2,0) != 0) q=0.5
+      if(i/2 - round(i/2,0) != 0) q=0.5
       else q=0
-      for(j in 1:gridsize) npos[gridsize*(i-1)*j,] = c(i+q, j)
+      for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i+q, j)
     }
   }
   
@@ -68,7 +70,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
             plentd = as.integer(nrow(df)),
             currtrain = as.double(currtrain),
             plentr = as.integer(lentr), #Max num of iterations
-            hex = as.integer(0),
+            hex = as.integer(hex),
             grow = as.integer(grow)
   )
   
@@ -97,7 +99,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
   training = data.frame(training)
   GT = outc$gt
   
-  gsom_model <- list(nodes = nodes, training = training, GT = GT, norm_param=0)
+  gsom_model <- list(nodes = nodes, training = training, GT = GT, norm_param=0, nhood = nhood)
   class(gsom_model) <- "gsom"
   
   return(gsom_model)

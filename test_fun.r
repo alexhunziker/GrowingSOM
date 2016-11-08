@@ -24,7 +24,7 @@ load("/media/SWW/Alex/Validation/SBR_raw.RData")
 require(kohonen)
 data("wines")
 training.wines <- sample(nrow(wines), 120)
-test.wines <- wines[-training.wines,] #wrong
+test.wines <- wines[-training.wines,] 
 
 data(iris)
 iris[,5] <- as.numeric(iris[,5])
@@ -43,6 +43,11 @@ gsom_model <- train.gsom(traindata,
 supervised_gsom <- train_xy.gsom(wines[training.wines,], wine.classes[training.wines], spreadFactor = 0.99)
 supervised_gsom2 <- train_xy.gsom(iris[,1:4], iris[,5:6], spreadFactor = 0.99)
 
+# If after this there was another, supervised training, the programm would crash! why? because of global variables.
+gsom_model_hex <- train.gsom(traindata, 
+                             keepdata = FALSE, iterations = 50, 
+                             spreadFactor = 0.9, alpha = 0.5, nhood = "hex")
+
 # Map data
 mapped_realdata <- map(gsom_model, traindata)
 mapped_testdata <- map(gsom_model, testdf, retaindata = TRUE)
@@ -54,6 +59,10 @@ plot(gsom_model, type="property")
 plot(gsom_model, type="property", dim=8, main="Testplot")
 plot(gsom_model, type="training")
 plot(gsom_model, type="dist")
+
+plot(gsom_model_hex)
+plot(gsom_model_hex, type="property")
+plot(gsom_model_hex, type="dist")
 
 plot(supervised_gsom, type="property")
 plot(supervised_gsom, type="predict")
