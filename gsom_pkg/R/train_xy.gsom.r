@@ -36,6 +36,10 @@ train_xy.gsom <- function(data, y, spreadFactor=0.8, keepdata=FALSE, iterations=
   gsom_model <- grow_xy.gsom(y, df, iterations, spreadFactor, alpha, gridsize, nhood, grow)
   t2 <- Sys.time()
   print(t2-t1)
+
+	gsom_model$nodes$codes <- t(apply(gsom_model$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
+
+	gsom_model$nodes$predict <- t(apply(gsom_model$nodes$perdict, 1, function(x){(x*ifelse(maxy==miny,1,(maxy-miny))+miny)}))
   
   norm_param <- data.frame(min = minx, max = maxx, miny = miny, maxy = maxy)
   gsom_model[["norm_param"]] <- norm_param

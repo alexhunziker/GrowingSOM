@@ -44,11 +44,10 @@ void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *codes, d
         }
         dm = dist;
       }
-			printf("dist:%f node:%d\n",dist,k);
 
     }
 
-    ndist[i] = dm;
+    ndist[i] = sqrt(dm);
     bmn[i] = nearest+1;
 
     if(nearest == -1) error("No nearest unit found.");

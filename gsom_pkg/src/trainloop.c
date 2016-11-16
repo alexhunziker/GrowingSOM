@@ -130,7 +130,7 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 			if(nearest == -1) error("Critical: No best matching node found. This should not happen.");
 
 			//Update some counters
-			distnd[nearest] += dm;
+			distnd[nearest] += sqrt(dm);
 			errorsum += dm;
 			freq[nearest]++;
 

@@ -14,6 +14,10 @@ predict.gsom <- function(gsom_model, df, retaindata=FALSE){
   max <- gsom_model$norm_param$max
   df <- as.matrix(df)
   df <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
+  gsom_model$nodes$codes <- t(apply(gsom_model$nodes$codes, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
+  miny <- gsom_model$norm_param$miny
+  maxy <- gsom_model$norm_param$maxy
+  gsom_model$nodes$predict <- t(apply(gsom_model$nodes$predict, 1, function(x){(x-miny)/ifelse(maxy==miny,1,(maxy-miny))}))
   
   bmn <- rep(0, times=nrow(df))
   ndist <- rep(0, times=nrow(df))
@@ -39,6 +43,9 @@ predict.gsom <- function(gsom_model, df, retaindata=FALSE){
     predict[i,] = gsom_model$nodes$predict[bmn[i],]
   }
   #preditc = 0;
+
+  gsom_model$nodes$codes <- t(apply(gsom_model$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
+  gsom_model$nodes$predict <- t(apply(gsom_model$nodes$perdict, 1, function(x){(x*ifelse(maxy==miny,1,(maxy-miny))+miny)}))
   
   gsom_mapped = list();
   gsom_mapped[["nodes"]] = gsom_model$nodes

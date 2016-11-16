@@ -17,6 +17,7 @@ map.gsom <- function(gsom_model, df, retaindata=FALSE){
   min <- gsom_model$norm_param$min
   max <- gsom_model$norm_param$max
   df <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
+  gsom_model$nodes$codes <- t(apply(gsom_model$nodes$codes, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
   
   bmn <- rep(0, times=nrow(df))
   ndist <- rep(0, times=nrow(df))
@@ -43,6 +44,8 @@ map.gsom <- function(gsom_model, df, retaindata=FALSE){
   gsom_mapped[["mapped"]] = data.frame(bmn=bmn, dist=dist)
   gsom_mapped[["norm_param"]] = gsom_model$scale
   if(retaindata) gsom_mapped[["data"]] == df;
+
+  gsom_mapped$nodes$codes <- t(apply(gsom_mapped$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
   
   class(gsom_mapped) = "gsom"
   
