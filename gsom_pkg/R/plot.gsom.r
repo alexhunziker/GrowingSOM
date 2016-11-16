@@ -39,11 +39,16 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     
   }else if(type == "dist"){
     
+    hlim = max(max(gsom_object$nodes$position[, 1])-min(gsom_object$nodes$position[, 1]), 
+               max(gsom_object$nodes$position[, 2])-min(gsom_object$nodes$position[, 2]))/2 + 0.5
+    hx = (max(gsom_object$nodes$position[, 1])+min(gsom_object$nodes$position[, 1]))/2
+    hy = (max(gsom_object$nodes$position[, 2])+min(gsom_object$nodes$position[, 2]))/2
     par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="n", main=paste("Avgerage Euclidan Distance From BMU"), xlab="", ylab="", xaxt='n', yaxt='n',
-         pch=16, cex=3, col=plotrix::color.scale(gsom_object$nodes$error,c(0.9,0),c(0.9,0),c(0.9,1))
+         type="n", main=paste("Avgerage Euclidan Distance From BMN"), xlab="", ylab="", xaxt='n', yaxt='n',
+         xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3, 
+         col=plotrix::color.scale(gsom_object$nodes$error,c(0.9,0),c(0.9,0),c(0.9,1))
     )
     symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
             circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
@@ -110,9 +115,9 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
            xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$codes[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
+              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$codes[,i],c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
-                 col=plotrix::color.scale(scale,c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
+                 col=plotrix::color.scale(scale,c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       
     }
     
@@ -146,9 +151,9 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
            xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$predict[,i],c(1,1),c(1,0.1),c(1,0.1)))
+              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$predict[,i],c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
-                 col=plotrix::color.scale(scale,c(1,1),c(1,0.1),c(1,0.1)))
+                 col=plotrix::color.scale(c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       
     }
     
