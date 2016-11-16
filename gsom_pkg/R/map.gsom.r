@@ -17,6 +17,7 @@ map.gsom <- function(gsom_model, df, retaindata=FALSE){
   min <- gsom_model$norm_param$min
   max <- gsom_model$norm_param$max
   df <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
+  return(df)
   
   codes <- rep(0, times=nrow(df))
   ndist <- rep(0, times=nrow(df))

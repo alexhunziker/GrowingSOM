@@ -83,7 +83,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		//  -The calculation of the learning rate from the traditional Kohonen should be used for
 		//   the phase 2.
 		if(phase == 1) lr = lrinit;
-		else lr = lrinit - (double)i/(double)rep*lrinit;
+		//else lr = lrinit - (double)i/(double)rep*lrinit;
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -96,7 +96,8 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 			//Adjust learning Rate
 			//Use normal kohohnen lr for spreading phase
 			if(phase==1) lr = *alpha * ( 1-(3.8/lennd))*lr;
-			else lr = lrinit - (double)i/(double)rep*lrinit;
+			else lr = 0.05 - (0.05-0.01)*(i*lendf+j)/totiter;
+			//else lr = lrinit - (double)i/(double)rep*lrinit;
 			//lr = *alpha * ( 1-(3.8/lennd))*lr;
 
 			// Find best matching node
@@ -154,11 +155,14 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 
 			//Adjust neighbourhood
 			current = root;
-			while(current -> next != NULL){
+			//print_ll(current);
+			while(current != NULL){
 
 				for(k=0; k<dim; k++){
+					//printf("%d,%d,%d, %d: Adjusted %f (%f)", i, j, k, current -> nodeid, weights[current -> nodeid + k*lentn], df[x + k*lendf]);
 					weights[current -> nodeid + k*lentn] = weights[current -> nodeid+ k*lentn] +
 						(df[x + k*lendf] - weights[current -> nodeid+ k*lentn]) * lr * current -> adrate;
+					//printf(" to %f, with adrate %f lr %f\n", weights[current -> nodeid + k*lentn], current -> adrate, lr);
 				}
 
 				current = current -> next;
@@ -362,7 +366,7 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 		//Iteration over DF (well the no of observations anyways) is completed
 
 		//Update Training Progress
-		meandist = errorsum / lendf;
+		meandist = sqrt(errorsum / dim) / lendf;
 		currtrain[i + 0*lentr] = i+1;
 		currtrain[i + 1*lentr] = phase;
 		currtrain[i + 2*lentr] = meandist;
@@ -433,11 +437,15 @@ void som_train_loop(double *df, double *weights, double *distnd, Sint *prep, Sin
 //Duplicates (that already esixist in Origin) are sorted out and not returned. The returned LL only contains new elements, and a Pointer
 struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w){
 
-	struct adjust *nroot, *tmp;
+	struct adjust *nroot, *tmp, *rorigin;
 	int isneighbour, exclude;
 	int l, m;
 
 	nroot = NULL;
+	rorigin = origin;
+	
+	//printf("old");
+	//print_ll(origin);
 
 	//Origin is a linked list containing of n nodes, to which neighbours should be found
 	if(origin == NULL) error("Linked list which should contain at least one origin is empty.");
@@ -461,21 +469,22 @@ struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust 
 
 				//Sort out nodes that are in the input LL
 				exclude=0;
-				tmp = origin;
-				while(tmp -> next != NULL){
+				tmp = rorigin;
+				while(tmp != NULL){
 					if(tmp -> nodeid == l) exclude = 1;
 					tmp = tmp -> next;
 				}
 
 				//Add Node to new LL
 				if(exclude == 0){
-					//printf("Added node %d to linked list.\n", l);
+					//printf("-%d-", l);
 					tmp = (struct adjust *) malloc( sizeof(struct adjust) );
 					tmp -> next = nroot;
 					tmp -> nodeid = l;
 					tmp -> adrate = adrate;
 					nroot = tmp;
 				}
+				//printf(",%d,", exclude);
 
 			}
 
@@ -484,7 +493,10 @@ struct adjust *get_neighbours(double *npos, int lennd, int lentn, struct adjust 
 		origin = origin -> next;
 
 	}
-
+	
+	//printf("new");
+	//print_ll(nroot);
+	
 	return nroot;
 
 }

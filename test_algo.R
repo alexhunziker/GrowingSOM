@@ -108,7 +108,7 @@ Sys.sleep(2)
 print(paste("Kohonen map has: 400 nodes and an average Distance of", kohonen$changes[100]))
 print(paste("SOM fixt size map has: 400 nodes and an average Distance of", n_som$training$meandist[100]))
 print(paste("GSOM large size map has:", nrow(l_gsom$nodes$position), "nodes and an average Distance of", l_gsom$training$meandist[100]))
-print(paste("SOM fixt size map has:", nrow(s_gsom$nodes$position), "nodes and an average Distance of", s_gsom$training$meandist[100]))
+print(paste("GSOM small size map has:", nrow(s_gsom$nodes$position), "nodes and an average Distance of", s_gsom$training$meandist[100]))
 
 if(s_gsom$training$meandist[100] < s_gsom$training$meandist[100]) warning("Benchmark Warning: Larger GSOM does not have smaller distance")
 if(nrow(s_gsom$nodes$position) > nrow(l_gsom$nodes$position)) warning("Benchmark Warning: Spreading Factor seems not to increase node quantity.")
