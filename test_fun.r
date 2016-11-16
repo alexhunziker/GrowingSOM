@@ -86,3 +86,7 @@ summary(gsom_model)
 #summary(supervised_gsom)
 #summary(mapped_testdata)
 #summary(predicted)
+
+print(gsom_model_hex)
+print(mapped_testdata2)
+print(supervised_gsom)

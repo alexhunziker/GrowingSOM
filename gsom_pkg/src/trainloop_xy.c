@@ -9,19 +9,19 @@
 
 #define EPS 1e-4                /* relative test of equality of distances */
 
-struct adjust{
+struct nodelist{
   int nodeid;
   double adrate;
-  struct adjust *next;
+  struct nodelist *next;
 };
 
 extern double ax[];
 extern double ay[];
 
-struct adjust *get_neighbours_xy(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w);
-void clear_ll_xy(struct adjust *root);
+struct nodelist *get_neighbours_xy(double *npos, int lennd, int lentn, struct nodelist *origin, double adrate, int w);
+void clear_ll_xy(struct nodelist *root);
 
-void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, Sint *plendf,
+void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Sint *plendf,
 		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
 		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow, double *y, Sint *leny, Sint *pydim, double *predict){
 
@@ -34,26 +34,26 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 	int nearest, totiter, phase, w1, w2, nind;
 	int i, j, k, l, m, n, o, p;
 	double min, max, meandist, adrate, q, minp, maxp;
-	struct adjust *nneigh, *nonneigh;
+	struct nodelist *nneigh, *nonneigh;
 	double dist, tmp, dm, lr, errorsum, radius;
 	int nodegrow, x, w=4;
-	struct adjust *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
+	struct nodelist *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
 	double sr = 0.5;
 
 	if(*leny != lendf) error("%d, %d, matrixes must have the same number of rows", (int)*leny, lendf);
-	
+
 	if(*hex==1){
 	  w=6;
 	  memcpy(ax, (double [6]){1.00, -1.00, 0.50, -0.50, 0.50, -0.50}, 6*sizeof(double));
 	  memcpy(ay, (double [6]){0.00, -0.00, 0.75, 0.75, -0.75, -0.75}, 6*sizeof(double));
-	} else {		
-		w=4;		
-		memcpy(ax, (double [6]){0.0, 0.0, 1.0, -1.0, 0.0, 0.0}, 6*sizeof(double));		
+	} else {
+		w=4;
+		memcpy(ax, (double [6]){0.0, 0.0, 1.0, -1.0, 0.0, 0.0}, 6*sizeof(double));
 		memcpy(ay, (double [6]){1.0, -1.0, 0.0, 0.0, 0.0, 0.0}, 6*sizeof(double));
 	}
 
 	//Prepare LL
-	root = (struct adjust *) malloc( sizeof(struct adjust) );
+	root = (struct nodelist *) malloc( sizeof(struct nodelist) );
 
 	totiter = rep * lendf;
 
@@ -84,8 +84,8 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
 
-			R_CheckUserInterrupt();	
-			
+			R_CheckUserInterrupt();
+
 			//Select Random observation
 			x = ((lendf-1) * unif_rand());
 
@@ -105,7 +105,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 				//Compute Euclidean Distance
 				dist = 0.0;
 				for (l = 0; l < dim; l++) {
-					tmp = (df[x + lendf*l] - weights[k + l*lentn])*0.25;
+					tmp = (df[x + lendf*l] - codes[k + l*lentn])*0.25;
 					dist += tmp * tmp;
 				}
 				for (l = 0; l > ydim; l++){
@@ -157,8 +157,8 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 			while(current -> next != NULL){
 
 				for(k=0; k<dim; k++){
-					weights[current -> nodeid + k*lentn] = weights[current -> nodeid+ k*lentn] +
-						(df[x + k*lendf] - weights[current -> nodeid+ k*lentn]) * lr * current -> adrate;
+					codes[current -> nodeid + k*lentn] = codes[current -> nodeid+ k*lentn] +
+						(df[x + k*lendf] - codes[current -> nodeid+ k*lentn]) * lr * current -> adrate;
 				}
 				for(k=0; k<ydim; k++){
 					predict[current -> nodeid + k*lentn] = predict[current -> nodeid+ k*lentn] +
@@ -225,8 +225,8 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 							freq[lennd - 1] = 0;
 
 							//Get the neighbours of the new node.
-							//struct adjust *newnode;
-							newnode = malloc(sizeof(struct adjust));
+							//struct nodelist *newnode;
+							newnode = malloc(sizeof(struct nodelist));
 							newnode -> next = NULL;
 							newnode -> nodeid = lennd-1;
 
@@ -234,14 +234,14 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 
 							clear_ll_xy(newnode);
 
-							//Set new weights for the new node. 4 Cases (A, B, C & D are considered)
+							//Set new codes for the new node. 4 Cases (A, B, C & D are considered)
 							if(nneigh -> next != NULL){
 
 								//Case B (More than one direct neighbour exists)
 								//printf("B");
 
 								for(n=0; n<dim; n++){
-									weights[lennd-1 + n*lentn] = (weights[nneigh -> nodeid + n*lentn] + weights[nneigh -> next -> nodeid + n*lentn]) / 2;
+									codes[lennd-1 + n*lentn] = (codes[nneigh -> nodeid + n*lentn] + codes[nneigh -> next -> nodeid + n*lentn]) / 2;
 								}
 								for(n=0; n<ydim; n++){
 									predict[lennd-1 + n*lentn] = (predict[nneigh -> nodeid + n*lentn] + predict[nneigh -> next -> nodeid + n*lentn]) / 2;
@@ -250,7 +250,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 							} else{
 
 								//Get the direct neighbours of nearest
-								newnode_f = malloc(sizeof(struct adjust));
+								newnode_f = malloc(sizeof(struct nodelist));
 								newnode_f -> next = NULL;
 								newnode_f -> nodeid = nearest;
 
@@ -275,7 +275,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 											free(hptr2);
 										} else {
 											prev -> next = NULL;
-											//free(hptr); #memory leak?		
+											//free(hptr); #memory leak?
 											//hptr = NULL;
 										}
 									}
@@ -297,10 +297,10 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 									w2 = tmp;
 									//printf("A");
 									for(o=0; o < dim; o++){
-										if(weights[w1 + o*lentn] < weights[w2 + o*lentn]){
-											weights[lennd-1 + lentn*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
+										if(codes[w1 + o*lentn] < codes[w2 + o*lentn]){
+											codes[lennd-1 + lentn*o] = codes[w1 + o*lentn]-(codes[w2 + o*lentn] - codes[w1 + o*lentn]);
 										}else{
-											weights[lennd-1 + lentn*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
+											codes[lennd-1 + lentn*o] = codes[w1 + o*lentn]-(codes[w2 + o*lentn] - codes[w1 + o*lentn]);
 										}
 
 									}
@@ -316,7 +316,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 								}else if(nonneigh == NULL){
 
 									//Case D (only direct neghbour of new nowde has no neighbours)
-									//Initialize w. average weights according to paper.
+									//Initialize w. average codes according to paper.
 									printf("D");
 									for(o=0; o<dim; o++){
 
@@ -326,15 +326,15 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 										minp= INFINITY;
 										maxp= -INFINITY;
 										for(p=0; p<lennd; p++){
-											if(weights[p + o*lentn] > max) max = weights[p + o*lentn];
-											if(weights[p + o*lentn] < min) min = weights[p + o*lentn];
+											if(codes[p + o*lentn] > max) max = codes[p + o*lentn];
+											if(codes[p + o*lentn] < min) min = codes[p + o*lentn];
 											if(o<ydim){
 												if(predict[p + o*lentn] > maxp) maxp = predict[p + o*lentn];
 												if(predict[p + o*lentn] < minp) minp = predict[p + o*lentn];
 											}
 										}
 
-										weights[lennd-1 + lentn*o] = (min + max) / 2;
+										codes[lennd-1 + lentn*o] = (min + max) / 2;
 										predict[lennd-1 + lentn*o] = (minp + maxp) / 2;
 
 									}
@@ -346,10 +346,10 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 									w2 = nonneigh -> nodeid; //Random existing neighbour of nearest.
 
 									for(o=0; o < dim; o++){
-										if(weights[w1 + o*lentn] < weights[w2 + o*lentn]){
-											weights[lennd-1 + lentn*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
+										if(codes[w1 + o*lentn] < codes[w2 + o*lentn]){
+											codes[lennd-1 + lentn*o] = codes[w1 + o*lentn]-(codes[w2 + o*lentn] - codes[w1 + o*lentn]);
 										}else{
-											weights[lennd-1 + lentn*o] = weights[w1 + o*lentn]-(weights[w2 + o*lentn] - weights[w1 + o*lentn]);
+											codes[lennd-1 + lentn*o] = codes[w1 + o*lentn]-(codes[w2 + o*lentn] - codes[w1 + o*lentn]);
 										}
 
 									}
@@ -386,7 +386,7 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 
 			//Element j has been checked. Reset LL.
 			clear_ll_xy(root);
-			root = malloc(sizeof(struct adjust));
+			root = malloc(sizeof(struct nodelist));
 
 		}
 
@@ -416,8 +416,8 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 				npos[lennd-1 + lentn] = 0.0/0.0;
 
 				for(k=0; k<dim; k++){
-					weights[j + k*lentn] = weights[lennd-1 + k*lentn];
-					weights[lennd-1 + k*lentn] = 0.0/0.0;
+					codes[j + k*lentn] = codes[lennd-1 + k*lentn];
+					codes[lennd-1 + k*lentn] = 0.0/0.0;
 				}
 
 				for(k=0; k<ydim; k++){
@@ -463,37 +463,37 @@ void som_train_loop_xy(double *df, double *weights, double *distnd, Sint *prep, 
 
 }
 
-//This function searches for the neighbourhood of a node (required as struct adjust)
-//Requires: Origin (struct adjust), Lenght of Nodes, Lenght of node Data Structure, Pointer to npos, and the adrate for the new points
+//This function searches for the neighbourhood of a node (required as struct nodelist)
+//Requires: Origin (struct nodelist), Lenght of Nodes, Lenght of node Data Structure, Pointer to npos, and the adrate for the new points
 //Duplicates (that already esixist in Origin) are sorted out and not returned. The returned LL only contains new elements, and a Pointer
-struct adjust *get_neighbours_xy(double *npos, int lennd, int lentn, struct adjust *origin, double adrate, int w){
-  
-  struct adjust *nroot, *tmp;
+struct nodelist *get_neighbours_xy(double *npos, int lennd, int lentn, struct nodelist *origin, double adrate, int w){
+
+  struct nodelist *nroot, *tmp;
   int isneighbour, exclude;
   int l, m;
-  
+
   nroot = NULL;
-  
+
   //Origin is a linked list containing of n nodes, to which neighbours should be found
   if(origin == NULL) error("Linked list which should contain at least one origin is empty.");
-  
+
   while(origin != NULL){
-    
+
     //Check all nodes are to be added to the new ll
     for(l=0; l<lennd; l++){
-      
+
       isneighbour = 0;
-      
+
       //Check if the element is a neighbour
       for(m=0; m < w; m++){
-        
+
         if(npos[l] == npos[origin -> nodeid] + ax[m] && npos[l + lentn] == npos[origin -> nodeid + lentn] + ay[m])
           isneighbour = 1;
-        
+
       }
-      
+
       if(isneighbour == 1){
-        
+
         //Sort out nodes that are in the input LL
         exclude=0;
         tmp = origin;
@@ -501,32 +501,32 @@ struct adjust *get_neighbours_xy(double *npos, int lennd, int lentn, struct adju
           if(tmp -> nodeid == l) exclude = 1;
           tmp = tmp -> next;
         }
-        
+
         //Add Node to new LL
         if(exclude == 0){
           //printf("Added node %d to linked list.\n", l);
-          tmp = (struct adjust *) malloc( sizeof(struct adjust) );
+          tmp = (struct nodelist *) malloc( sizeof(struct nodelist) );
           tmp -> next = nroot;
           tmp -> nodeid = l;
           tmp -> adrate = adrate;
           nroot = tmp;
         }
-        
+
       }
-      
+
     }
-    
+
     origin = origin -> next;
-    
+
   }
-  
+
   return nroot;
-  
+
 }
 
 // House keeping, to avoid memory leaks.
-void clear_ll_xy(struct adjust *root){
-  struct adjust *tmp;
+void clear_ll_xy(struct nodelist *root){
+  struct nodelist *tmp;
   while(root != NULL){
     tmp = root;
     root = root -> next;
@@ -534,4 +534,3 @@ void clear_ll_xy(struct adjust *root){
   }
   return;
 }
-

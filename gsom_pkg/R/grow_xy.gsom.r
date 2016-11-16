@@ -24,11 +24,11 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
   
   df <- as.matrix(df)
   
-  weights <- matrix(0, nrow=lentn, ncol=ncol(df))
-  weights[1:initnodes,] <- runif(initnodes*ncol(df))
+  codes <- matrix(0, nrow=lentn, ncol=ncol(df))
+  codes[1:initnodes,] <- runif(initnodes*ncol(df))
                                  
   predict <- matrix(0, nrow=lentn, ncol=ncol(y))
-  weights[1:initnodes,] <- runif(initnodes*ncol(df))
+  codes[1:initnodes,] <- runif(initnodes*ncol(df))
   
   
   distnd <- rep(0, lentn) #Error per node
@@ -61,7 +61,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
   
   outc = .C("som_train_loop_xy",
             df = as.double(df),
-            weights = as.double(weights),
+            codes = as.double(codes),
             distnd = as.double(distnd),
             prep = as.integer(repet), #repetitions
             plendf = as.integer(nrow(df)),
@@ -89,9 +89,9 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
   training <- training[1:repet,]
   colnames(training) <- c("iteration", "training_stage", "meandist", "num_of_nodes", "nodegrowth")
   
-  weights <- matrix(outc$weights, ncol=ncol(df))
-  weights <- weights[1:outc$plennd,]
-  colnames(weights) <- colnames(df)
+  codes <- matrix(outc$codes, ncol=ncol(df))
+  codes <- codes[1:outc$plennd,]
+  colnames(codes) <- colnames(df)
   
   predict <- matrix(outc$predict, ncol=ncol(y))
   predict <- predict[1:outc$plennd,]
@@ -106,7 +106,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
   
   nodes <- list(
     position = data.frame(npos),
-    weight = data.frame(weights),
+    codes = data.frame(codes),
     predict = data.frame(predict),
     error = distnd,
     freq = freq

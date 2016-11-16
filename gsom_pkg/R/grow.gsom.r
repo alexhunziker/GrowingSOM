@@ -24,8 +24,8 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
   
   df <- as.matrix(df)
   
-  weights <- matrix(0, nrow=lentn, ncol=ncol(df))
-  weights[1:initnodes,] <- runif(initnodes*ncol(df))
+  codes <- matrix(0, nrow=lentn, ncol=ncol(df))
+  codes[1:initnodes,] <- runif(initnodes*ncol(df))
   
   distnd <- rep(0, lentn) #Error per node
   freq <- rep(0, lentn) #Frequ of nodes
@@ -54,7 +54,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
   
   outc = .C("som_train_loop",
             df = as.double(df),
-            weights = as.double(weights),
+            codes = as.double(codes),
             distnd = as.double(distnd),
             prep = as.integer(repet), #repetitions
             plendf = as.integer(nrow(df)),
@@ -78,9 +78,9 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
   training <- training[1:repet,]
   colnames(training) <- c("iteration", "training_stage", "meandist", "num_of_nodes", "nodegrowth")
   
-  weights <- matrix(outc$weights, ncol=ncol(df))
-  weights <- weights[1:outc$plennd,]
-  colnames(weights) <- colnames(df)
+  codes <- matrix(outc$codes, ncol=ncol(df))
+  codes <- codes[1:outc$plennd,]
+  colnames(codes) <- colnames(df)
   
   npos <- matrix(outc$npos, ncol=2)
   npos <- matrix(npos[1:outc$plennd,], ncol=2)
@@ -91,7 +91,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
   
   nodes <- list(
     position = data.frame(npos),
-    weight = data.frame(weights),
+    codes = data.frame(codes),
     error = distnd,
     freq = freq
   )

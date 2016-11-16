@@ -85,13 +85,13 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
   } else if(type == "property") {
     
     par(mar=c(5.1,4.1,4.1,5.5))
-    if(any(dim > ncol(gsom_object$nodes$weight))) stop("Invalid value for parameter dim.")
-    if(dim == 0) dim <- c(1:ncol(gsom_object$nodes$weight))
+    if(any(dim > ncol(gsom_object$nodes$codes))) stop("Invalid value for parameter dim.")
+    if(dim == 0) dim <- c(1:ncol(gsom_object$nodes$codes))
     
     if(main == "") gennames = TRUE
     for(i in dim){ #should eventually be changed to colnames. For works there as well
       
-      if(exists("gennames")) main <- paste("Property:", colnames(gsom_object$nodes$weight[i]))
+      if(exists("gennames")) main <- paste("Property:", colnames(gsom_object$nodes$codes[i]))
       
       minattr <- gsom_object$norm_param[i,1]
       maxattr <- gsom_object$norm_param[i,2]
@@ -110,7 +110,7 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
            xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$weight[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
+              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$codes[,i],c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
       image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
                  col=plotrix::color.scale(scale,c(0.3,0.9),c(0,0.95),c(0.3,0.95)))
       
