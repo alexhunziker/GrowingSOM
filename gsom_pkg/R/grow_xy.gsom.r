@@ -9,7 +9,7 @@
 # The performance intensive loop has been outsourced to C for performance reasons.
 
 #Mainly calls the C loop and processes returned data
-grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, grow){
+grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, grow, initrad){
 
   # Set some parameters
   lentr <- 10000
@@ -17,8 +17,13 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
   
   lrinit <- 0.9
   alpha <- 0.9 #Learning Rate Depreciation factor.
-  radius <- 3 #Initial Radius. Missing feature.
-  if(grow==2) radius = sqrt(gridsize)
+  
+  if(is.null(initrad)){
+    if(grow==1) radius = 3  # Arbitrary default value
+    else radius = sqrt(gridsize)
+  } else{
+    radius = initrad
+  }
   
   initnodes <- gridsize*gridsize
   
@@ -115,9 +120,9 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
   training = data.frame(training)
   GT = outc$gt
   
-  gsom_model <- list(nodes = nodes, training = training, GT = GT, norm_param=0)
-  class(gsom_model) <- "gsom"
+  gsom_object <- list(nodes = nodes, training = training, GT = GT, norm_param=0, nhood = nhood)
+  class(gsom_object) <- "gsom"
   
-  return(gsom_model)
+  return(gsom_object)
   
 }

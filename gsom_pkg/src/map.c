@@ -47,7 +47,7 @@ void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *codes, d
 
     }
 
-    ndist[i] = sqrt(dm);
+    ndist[i] = sqrt(dm / (double)*dim);
     bmn[i] = nearest+1;
 
     if(nearest == -1) error("No nearest unit found.");

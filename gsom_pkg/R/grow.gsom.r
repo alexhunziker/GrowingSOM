@@ -23,6 +23,8 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
 	if(is.null(initrad)){
 		if(grow==1) radius = 3  # Arbitrary default value
 		else radius = sqrt(gridsize)
+	} else{
+	  radius = initrad
 	}
   
   df <- as.matrix(df)

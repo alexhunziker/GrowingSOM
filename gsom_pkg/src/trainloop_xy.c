@@ -79,7 +79,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 		//  -The calculation of the learning rate from the traditional Kohonen should be used for
 		//   the phase 2.
 		if(phase == 1) lr = lrinit;
-		else lr = lrinit - (double)i/(double)rep*lrinit;
+		//else lr = lrinit - (double)i/(double)rep*lrinit;
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -92,7 +92,8 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			//Adjust learning Rate
 			//Use normal kohohnen lr for spreading phase
 			if(phase==1) lr = *alpha * ( 1-(3.8/lennd))*lr;
-			else lr = lrinit - (double)i/(double)rep*lrinit;
+      else lr = 0.05-(0.05-0.01)*((double)i*(double)lendf+(double)j)/(double)totiter;
+			//else lr = lrinit - (double)i/(double)rep*lrinit;
 			//lr = *alpha * ( 1-(3.8/lennd))*lr;
 
 			// Find best matching node
@@ -129,7 +130,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			if(nearest == -1) error("Critical: No best matching node found. This should not happen.");
 
 			//Update some counters
-			distnd[nearest] += dm;
+			distnd[nearest] += sqrt(dm / (double)dim);
 			errorsum += dm;
 			freq[nearest]++;
 
@@ -154,7 +155,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 
 			//Adjust neighbourhood
 			current = root;
-			while(current -> next != NULL){
+			while(current != NULL){
 
 				for(k=0; k<dim; k++){
 					codes[current -> nodeid + k*lentn] = codes[current -> nodeid+ k*lentn] +
@@ -393,7 +394,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 		//Iteration over DF (well the no of observations anyways) is completed
 
 		//Update Training Progress
-		meandist = errorsum / lendf;
+		meandist = sqrt(errorsum / dim) / lendf;
 		currtrain[i + 0*lentr] = i+1;
 		currtrain[i + 1*lentr] = phase;
 		currtrain[i + 2*lentr] = meandist;
@@ -436,17 +437,6 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			phase = 2;
 		}
 
-		/*printf("| ");
-		tmp = (double)i/(double)rep*20;
-		for(j=0; j!=20; j++){
-			if(tmp>0){
-				tmp--;
-				printf("-");
-			} else {
-				printf(" ");
-			}
-		}
-		printf(" |\n");*/
 		printf(".");
 
 	}
@@ -468,11 +458,12 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 //Duplicates (that already esixist in Origin) are sorted out and not returned. The returned LL only contains new elements, and a Pointer
 struct nodelist *get_neighbours_xy(double *npos, int lennd, int lentn, struct nodelist *origin, double adrate, int w){
 
-  struct nodelist *nroot, *tmp;
+  struct nodelist *nroot, *tmp, *rorigin;
   int isneighbour, exclude;
   int l, m;
 
   nroot = NULL;
+  rorigin = origin;
 
   //Origin is a linked list containing of n nodes, to which neighbours should be found
   if(origin == NULL) error("Linked list which should contain at least one origin is empty.");
@@ -496,8 +487,8 @@ struct nodelist *get_neighbours_xy(double *npos, int lennd, int lentn, struct no
 
         //Sort out nodes that are in the input LL
         exclude=0;
-        tmp = origin;
-        while(tmp -> next != NULL){
+        tmp = rorigin;
+        while(tmp != NULL){
           if(tmp -> nodeid == l) exclude = 1;
           tmp = tmp -> next;
         }

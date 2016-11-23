@@ -25,21 +25,21 @@ train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, al
   }
 
   t1 <- Sys.time()
-  gsom_model <- grow.gsom(gsom_model, df, iterations, spreadFactor, alpha, gridsize = gridsize, nhood=nhood, grow=grow, initrad = initrad)
+  gsom_object <- grow.gsom(gsom_object, df, iterations, spreadFactor, alpha, gridsize = gridsize, nhood=nhood, grow=grow, initrad = initrad)
   t2 <- Sys.time()
   print(t2-t1)
 
-	gsom_model$nodes$codes <- t(apply(gsom_model$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
+	gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
   
   norm_param <- data.frame(min = min, max = max)
-  gsom_model[["norm_param"]] <- norm_param
+  gsom_object[["norm_param"]] <- norm_param
   
   if(keepdata==TRUE){
-    gsom_model[["data"]] = data
+    gsom_object[["data"]] = data
   }
   
-  class(gsom_model) = "gsom"
+  class(gsom_object) = "gsom"
   
-  return(gsom_model)
+  return(gsom_object)
   
 }

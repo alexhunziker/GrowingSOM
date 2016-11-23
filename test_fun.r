@@ -43,7 +43,6 @@ gsom_model <- train.gsom(traindata,
 supervised_gsom <- train_xy.gsom(wines[training.wines,], wine.classes[training.wines], spreadFactor = 0.99)
 supervised_gsom2 <- train_xy.gsom(iris[,1:4], iris[,5:6], spreadFactor = 0.99)
 
-# If after this there was another, supervised training, the programm would crash! why? because of global variables.
 gsom_model_hex <- train.gsom(traindata, 
                              keepdata = FALSE, iterations = 50, 
                              spreadFactor = 0.9, alpha = 0.5, nhood = "hex")
@@ -83,9 +82,9 @@ plot(mapped_testdata2)
 
 # Summary
 summary(gsom_model)
-#summary(supervised_gsom)
-#summary(mapped_testdata)
-#summary(predicted)
+summary(supervised_gsom)
+summary(mapped_testdata)
+summary(predicted)
 
 print(gsom_model_hex)
 print(mapped_testdata2)

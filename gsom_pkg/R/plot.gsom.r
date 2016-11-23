@@ -134,8 +134,8 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
       
       if(exists("gennames")) main <- paste("Prediction:", colnames(gsom_object$nodes$predict[i]))
       
-      minattr <- gsom_object$norm_param[i,3]
-      maxattr <- gsom_object$norm_param[i,4]
+      minattr <- gsom_object$norm_param_y[i,1]
+      maxattr <- gsom_object$norm_param_y[i,2]
       scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
       
       hlim = max(max(gsom_object$nodes$position[, 1])-min(gsom_object$nodes$position[, 1]), 
@@ -153,7 +153,7 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
               add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$predict[,i],c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
-                 col=plotrix::color.scale(c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
+                 col=plotrix::color.scale(scale,c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       
     }
     
