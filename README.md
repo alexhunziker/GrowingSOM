@@ -6,47 +6,44 @@ __Damminda Alahakoon, Saman K. Halgamuge (2000)__: Dynamic Self-Organizing Maps 
 
 ## Functionality
 
-### train.gsom
-Generates and trains a new gsom model according to a numeric data.frame or matrix.
-
-### train_xy.gsom
-Supervised learning version of train.gsom
-
-### map.gsom
-Maps testdata onto a trained gsom_model.
-
-### predict.gsom
-Provides a summary of a gsom_model.
-
-### plot.gsom
-Prints a gsom_model.
-
-### summary.gsom 
-Summarizes gsom 
-
-### print.gsom
-Prints gsom
-
-### 
+- train.gsom()
+- train_xy.gsom()
+- map.gsom()
+- predict.gsom()
+- summary.gsom()
+- print.gsom()
+- plot.gsom()
 
 ## Installation
-In order to use the functionality, the file ``main.r`` has to be loaded.
 
-Build R package
+Make a R Package out of the folder gsom_pkg using the command:
 
 ```bash
 	R CMD build gsom-pkg
 ```
 
-Compile / Install up in R:
-```r
-    remove.packages("GrowingSOM", lib="~/R/x86_64-pc-linux-gnu-	library/3.2")
-    install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
-    detach("package:GrowingSOM", unload=TRUE)
-    library(GrowingSOM)
+Windows may need a binary Package which can be obtained by:
+
+```bash
+	mkdir temp_location
+	R CMD INSTALL --build -l temp_location GrowingSOM_VERSION.tar.gz
 ```
 
-## Remarks
-Software is provided as is. No guarantee for functionality and or correctness of the code.
+installation Linux (in R):
+```R
+	install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
+```
 
-As the programm is under development, not all the functions have been implemented yet. 
+installation Windows (in R):
+```R
+	install.packages(repos=NULL, "C:/Users/hunzikal/Downloads/NetCoS_1.0.zip", type="binary")
+```
+
+## Legal
+
+GrowingSOM is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+GrowingSOM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GrowingSOM.  If not, see <http://www.gnu.org/licenses/>.

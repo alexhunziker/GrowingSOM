@@ -33,6 +33,10 @@
   \item{nhood}{
     define how the grid will be built, and how the neighbourhood will look like consequently. Allowed values are "rect" (rectangular) and "hex" (hexagonal).
   }
+  \item{initrad}{
+    if the gridsize is predetermined, the initial radius can be chosen here. If left blank, the square root of gridsize will be taken. \cr
+    A larger initrad can increase the quality of the clustering. However, the implementation can get very slow when a too large value is chosen. (number of necessary computations rise exponentially)
+  }
   \item{\dots}{
 %%     ~~Describe \code{\dots} here~~
 }
@@ -101,7 +105,6 @@ gsom.iris <- train.gsom(iris)
 gsom.iris <- train.gsom(iris, spreadFactor=0.95, keepdata=TRUE, iterations=30, alpha=0.5, gridsize = FALSE, nhood= "rect")
 
 # Fixed Grid size
-# This is currently rather slow
 gsom.iris <- train.gsom(iris, iterations=30, gridsize = 10)
 
 }

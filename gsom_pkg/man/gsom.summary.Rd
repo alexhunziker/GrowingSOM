@@ -1,5 +1,6 @@
 \name{gsom.summary}
 \alias{gsom.summary}
+\alias{gsom.print}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Summarize a gsom model
@@ -8,64 +9,50 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-gsom.summary(gsom_model)
+  summary.gsom(gsom_object, ...)
+  
+  print.gsom(gsom_object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{gsom_model}{
-%%     ~~Describe \code{gsom_model} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+  \item{gsom_object}{
+    any valid gsom object
+  }
+  \item{...}{
+    
+  }
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+\value{
+  Prints Information about the gsom_object
+}
+
+\author{
+  Alex Hunziker
+}
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+  train.gsom, train_xy.gsom, map.gsom, predict.gsom
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (gsom_model) 
-{
-    observations <- sum(gsom_model$nodes$freq)
-    dimenstions <- ncol(gsom_model$nodes$weight)
-    nodes <- nrow(gsom_model$nodes$position)
-    iterations <- nrow(gsom_model$training)
-    distance <- gsom_model$training$meandist[iterations]
-    if (is.null(gsom_model[["data"]])) 
-        sorstat = "is not"
-    else sorstat = "is"
-    print(paste("Growing SOM map with", nodes, "nodes."))
-    print(paste("Training data used:", observations, "Observations with", 
-        dimenstions, "Dimensions"))
-    print(paste("Training data", sorstat, "stored in the model."))
-    print(paste("Mean Distance to the closest unit in the map is:", 
-        distance, "(after", iterations, "iterations)"))
-  }
+  # Get some Data
+  data(iris)
+  iris_d = iris[,1:4]
+  
+  # Train a GSOM map
+  gsom_map = train.gsom(iris_d_tr, spreadFactor = 0.99)
+  
+  # Summary / Print
+  print(gsom_map)
+  summary(gsom_map)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ ~GSOM }
+\keyword{ ~SOM }
+\keyword{ ~Self }
+\keyword{ ~Organizing }
+\keyword{ ~Map }
+\keyword{ ~Growing }
+\keyword{ ~Print }
+\keyword{ ~Summary }
