@@ -37,11 +37,11 @@ traindata <- traindata[1:5000,3:ncol(traindata)]
 
 # Generate gsom model
 gsom_model <- train.gsom(traindata, 
-                         keepdata = FALSE, iterations = 50, 
+                         keepdata = T, iterations = 50, 
                          spreadFactor = 0.9, alpha = 0.5)
 
-supervised_gsom <- train_xy.gsom(wines[training.wines,], wine.classes[training.wines], spreadFactor = 0.99)
-supervised_gsom2 <- train_xy.gsom(iris[,1:4], iris[,5:6], spreadFactor = 0.99)
+supervised_gsom <- train_xy.gsom(wines[training.wines,], wine.classes[training.wines], spreadFactor = 0.95)
+supervised_gsom2 <- train_xy.gsom(iris[,1:4], iris[,5:6], spreadFactor = 0.95)
 
 gsom_model_hex <- train.gsom(traindata, 
                              keepdata = FALSE, iterations = 50, 

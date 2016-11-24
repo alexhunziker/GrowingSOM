@@ -47,7 +47,8 @@ train_xy.gsom <- function(data, y, spreadFactor=0.8, keepdata=FALSE, iterations=
 	  data.frame(apply(gsom_object$nodes$predict, 1, function(x){(x*ifelse(maxy==miny,1,(maxy-miny))+miny)}))
 	}
 	else gsom_object$nodes$predict <- t(apply(gsom_object$nodes$predict, 1, function(x){(x*ifelse(maxy==miny,1,(maxy-miny))+miny)}))
-  
+  colnames(gsom_object$nodes$predict) = colnames(y)
+	
   norm_param <- data.frame(min = minx, max = maxx)
   norm_param_y <- data.frame(miny = miny, maxy = maxy)
   gsom_object[["norm_param"]] <- norm_param

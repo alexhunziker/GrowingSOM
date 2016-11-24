@@ -38,10 +38,10 @@ predict.gsom <- function(gsom_object, df, retaindata=FALSE){
   bmn = matrix(bmn, ncol= 1)
   
   predict = data.frame(matrix(ncol=ncol(gsom_object$nodes$predict), nrow=nrow(df)))
+  colnames(predict) = colnames(gsom_object$nodes$predict)
   for(i in (1:nrow(df))){
     predict[i,] = gsom_object$nodes$predict[bmn[i,1],]
   }
-  preditc = 0;
   
   cy = ncol(gsom_object$nodes$predict)
 
