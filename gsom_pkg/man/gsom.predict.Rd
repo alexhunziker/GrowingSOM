@@ -1,6 +1,5 @@
-\name{gsom.predict}
-\alias{gsom.predict}
-%- Also NEED an '\alias' for EACH other topic documented here.
+\name{predict.gsom}
+\alias{predict.gsom}
 \title{
   Predict function for gsom
 }
@@ -8,7 +7,7 @@
   Map objects to a trained GSOM map, and return for each object the property associated with the corresponding winning unit. 
 }
 \usage{
-  gsom.predict(gsom_object, df, retaindata = FALSE)
+  predict.gsom(gsom_object, df, retaindata = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -54,7 +53,7 @@
 }
 \note{
   Distance Measurement: The following Formula is used for determining the distance from the best matching unit: \cr
-  sqrt((sum(df-code))^2 / Dimenstions)\cr
+  \code{sqrt((sum(df-code))^2 / Dimenstions)}\cr
   This is a different scale than is used by the kohonen package.
 }
 

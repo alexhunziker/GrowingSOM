@@ -29,9 +29,6 @@
     changes the title of the plots
   }
 }
-\value{
-  No return value
-}
 
 \author{
   Alex Hunziker
@@ -41,7 +38,7 @@
 }
 
 \examples{
-# Get some Data
+  # Get some Data
   data(iris)
   iris_d = iris[,1:4]
   
@@ -55,10 +52,10 @@
   plot(gsom_map, type = "properties")
   
   # Training
-  plot(gsom_map, type = "properties")
+  plot(gsom_map, type = "training")
   
   # Distances
-  plot(gsom_map, type = "properties")
+  plot(gsom_map, type = "distance")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

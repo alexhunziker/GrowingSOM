@@ -7,6 +7,5 @@ Author: Alex Hunziker
 Maintainer: Who to complain to <alex.hunziker@eawag.ch>
 Description: TBA later.
 Depends:
-    plotrix,
-    fields
+    plotrix
 License: GPL v3

@@ -33,7 +33,7 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
             circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
             add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$freq,c(0.9,0),c(0.9,0),c(0.9,1)))
-    image.plot(legend.only=TRUE, zlim=c(min(gsom_object$nodes$freq),max(gsom_object$nodes$freq)),
+    plot_scale(zlim=c(min(gsom_object$nodes$freq),max(gsom_object$nodes$freq)),
                col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),c(0.9,0),c(0.9,0),c(0.9,1)))
     par(mar=c(5.1,4.1,4.1,2.1))
     
@@ -56,7 +56,7 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     minattr <- min(gsom_object$nodes$error)
     maxattr <- max(gsom_object$nodes$error)
     scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
-    image.plot(legend.only=TRUE, zlim=c(min(gsom_object$nodes$error),max(gsom_object$nodes$error)),
+    plot_scale(zlim=c(min(gsom_object$nodes$error),max(gsom_object$nodes$error)),
                col=plotrix::color.scale(scale,c(0.9,0),c(0.9,0),c(0.9,1)))
     par(mar=c(5.1,4.1,4.1,2.1))
     
@@ -116,7 +116,7 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
               add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$codes[,i],c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
-      image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
+      plot_scale(zlim=c(minattr,maxattr),
                  col=plotrix::color.scale(scale,c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       
     }
@@ -152,7 +152,7 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
               add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$predict[,i],c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
-      image.plot(legend.only=TRUE, zlim=c(minattr,maxattr),
+      plot_scale(zlim=c(minattr,maxattr),
                  col=plotrix::color.scale(scale,c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
       
     }
