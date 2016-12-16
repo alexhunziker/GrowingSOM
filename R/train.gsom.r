@@ -8,7 +8,7 @@
 # gsom.train() is the main function, which should be called by the user.
 # The performance intensive loop has been outsourced to C for performance reasons.
 
-train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, alpha=0.5, gridsize = FALSE, nhood= "rect", initrad = NULL, ...){
+train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, alpha=0.9, beta=0.5, gridsize = FALSE, nhood= "rect", initrad = NULL, ...){
   
   # Normalizing the training or testdata (min/max) in order to balance the impact
   # of the different properties of the dataframe
@@ -25,7 +25,7 @@ train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, al
   }
 
   t1 <- Sys.time()
-  gsom_object <- grow.gsom(gsom_object, df, iterations, spreadFactor, alpha, gridsize = gridsize, nhood=nhood, grow=grow, initrad = initrad)
+  gsom_object <- grow.gsom(gsom_object, df, iterations, spreadFactor, alpha, beta, gridsize = gridsize, nhood=nhood, grow=grow, initrad = initrad)
   t2 <- Sys.time()
   print(t2-t1)
 

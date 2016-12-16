@@ -16,7 +16,7 @@ map.gsom <- function(gsom_object, df, retaindata=FALSE){
   # of the different properties of the dataframe
   min <- gsom_object$norm_param$min
   max <- gsom_object$norm_param$max
-  df <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
+  dfs <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
   gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
   
   bmn <- rep(0, times=nrow(df))
@@ -27,7 +27,7 @@ map.gsom <- function(gsom_object, df, retaindata=FALSE){
             plendf = as.integer(nrow(df)),
             lennd = as.integer(nrow(gsom_object$nodes$codes)),
             dim = as.integer(ncol(gsom_object$nodes$codes)),
-            df = as.double(df),
+            df = as.double(dfs),
             codes =as.double(as.matrix(gsom_object$nodes$codes)), 
             bmn = as.double(bmn),
             ndist = as.double(ndist),
@@ -43,7 +43,8 @@ map.gsom <- function(gsom_object, df, retaindata=FALSE){
   gsom_mapped[["nodes"]]$freq = outc$freq
   gsom_mapped[["mapped"]] = data.frame(bmn=bmn, dist=dist)
   gsom_mapped[["norm_param"]] = gsom_object$scale
-  if(retaindata) gsom_mapped[["data"]] == df;
+  if(retaindata) gsom_mapped[["data"]] = df
+  if(retaindata) print("hi")
 
   gsom_mapped$nodes$codes <- t(apply(gsom_mapped$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
   

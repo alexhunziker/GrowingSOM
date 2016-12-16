@@ -28,7 +28,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
                        Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow, double *y, Sint *leny, Sint *pydim, double *predict);
 
 void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint *plendf,
-		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
+		Sint *plennd, double *plrinit, double *freq, double *alpha, double *beta, Sint *pdim, double *gt, double *npos, double *pradius,
 		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow){
 
 	//Convert pointers
@@ -44,7 +44,7 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 	double dist, tmp, dm, lr, errorsum, radius;
 	int nodegrow, x, w=4;
 	struct nodelist *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
-	double sr = 0.5;
+	double sr = *beta;
 
 	if(*hex==1){
 	  w=6;

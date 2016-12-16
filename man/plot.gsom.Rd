@@ -8,7 +8,7 @@
   Plot growing self-organising maps, obtained from functions of the GrowingSOM package. Several types of plots are supported.
 }
 \usage{
-  plot.gsom(gsom_object, type = "count", dim = 0, main = "")
+  plot.gsom(gsom_object, type = "count", colors=NULL, dim = 0, main = "")
 }
 \arguments{
   \item{gsom_object}{
@@ -25,17 +25,26 @@
   \item{dim}{
     can be used if type is "property" to specifly which property should be plotted
   }
+  \item{colors}{
+    colors to be used to generate the plots. If set to NULL, the default colors will be used. Format: list(red, green, blue)\cr
+    \code{Examples:\cr 
+        colors = list(c(0.1, 0.9), c(0.1, 0.9), c(0.1, 0.9))   For gray scale\cr 
+        colors = list(c(1.0, 0.0), c(0.0, 1.0), c(0.0, 0.0))   Red to green}
+  }
   \item{main}{
     changes the title of the plots
+  }
+  \item{...}{
+    Collects further graphical parameters for the plot
   }
 }
 
 \author{
   Alex Hunziker
 }
-\note{
-  a plot for the distance of direct neighbours to the respective node should be introduced in the future.
-}
+%\note{
+%  a plot for the distance of direct neighbours to the respective node should be introduced in the future.
+%}
 
 \examples{
   # Get some Data

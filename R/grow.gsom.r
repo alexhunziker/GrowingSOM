@@ -9,16 +9,15 @@
 # The performance intensive loop has been outsourced to C for performance reasons.
 
 #Mainly calls the C loop and processes returned data
-grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhood, grow, initrad){
+grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize, nhood, grow, initrad){
   
   # Set some parameters
   lentr <- 10000
   lentn <- 10000
   
   lrinit <- 0.9
-  alpha <- 0.9 #Learning Rate Depreciation factor.
   
-  initnodes <- gridsize*gridsize
+  initnodes <- gridsize*round(gridsize/2,0)
 
 	if(is.null(initrad)){
 		if(grow==1) radius = 3  # Arbitrary default value
@@ -49,7 +48,9 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
     for(i in 1:gridsize){
       if(i/2 - round(i/2,0) != 0) q=0.5
       else q=0
-      for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i+q, (j+q)*1.50)
+      for(j in 1:(round(gridsize/2,0))) {
+        npos[round(gridsize/2,0)*(i-1)+j,] = c((i/2), (j+q)*1.50)
+      }
     }
   }
   
@@ -67,6 +68,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, gridsize, nhoo
             plrinit = as.double(lrinit),
             freq = as.double(freq),
             alpha = as.double(alpha), #for lr depreciation
+            beta = as.double(beta), #for depreciation of neighbour learning
             pdim = as.integer(ncol(df)),
             gt = as.double(gt), # Growth Rate
             npos = as.double(npos),

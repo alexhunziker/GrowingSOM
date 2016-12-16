@@ -1,19 +1,21 @@
 \name{train.gsom}
 \alias{train.gsom}
-%- Also NEED an '\alias' for EACH other topic documented here.
+
 \title{
   Train a Growing Self-Organizing Map
 }
 \description{
-  Computes a growing self-organizing map for mapping high-dimendional data to 2D. Euclidean distance is used.
+  Computes a growing self-organizing map for mapping high-dimendional data to 2D. 
 }
 \usage{
-  train.gsom <- function(data, spreadFactor=0.9, keepdata=FALSE, iterations=50, alpha=0.5, gridsize = FALSE, nhood= "rect", ...)
+  train.gsom(data, spreadFactor=0.9, keepdata=FALSE, 
+      iterations=50, alpha=0.9, beta = 0.5, gridsize = FALSE, 
+      nhood= "rect", initrad)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{data}{
-    a matrix, with each row representing an object.
+    a matrix or data.frame, with each row representing an observation and each column a dimension.
   }
   \item{spreadFactor}{
     the spread factor determines the rate with which new units are added to the map. Values close to 0 lead to few growth and therefore less nodes thatn values close to 1. The default value is 0.9. 
@@ -25,7 +27,10 @@
     number of times that the dataframe will be presented to the network. (Growing and Smoothing Phase combined)
   }
   \item{alpha}{
-    determines the rate with which changes of the codes of one node influences the changes of the codes of the neighbour. Recommended values are between 0 and 1.
+    discount factor for the learning rate during the growing phase of the training. Values should be between 0 and 1.
+  }
+  \item{beta}{
+    propagation rate. Determines the rate at which the error of a node, that cannot grow any nodes, is passed on to its neighbours. Suggested values may range between 0 and 1.
   }
   \item{gridsize}{
     default value is FALSE. If a nummeric value is entered, the grid-size of the network will be preditermined as a square with length of gridsize. No growth of the network will take place in this case.
@@ -35,14 +40,14 @@
   }
   \item{initrad}{
     if the gridsize is predetermined, the initial radius can be chosen here. If left blank, the square root of gridsize will be taken. \cr
-    A larger initrad can increase the quality of the clustering. However, the implementation can get very slow when a too large value is chosen. (number of necessary computations rise exponentially)
+    A larger initrad can increase the quality of the clustering. However, the script can get very slow when a too large value is chosen. (number of necessary computations rises exponentially)
   }
   \item{\dots}{
 %%     ~~Describe \code{\dots} here~~
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+  Euclidean distance is used in order to calculate the distances.
 }
 \value{
   an S3 object of class "gsom" with components:
@@ -55,7 +60,7 @@
   \item{nodes$distance}{
     average distance of observations from their best matching units, per unit.
   }
-  \item{nodes$frequency}{
+  \item{nodes$freq}{
     how many times each node was the best matching unit during the last iteration.
   }
   \item{training}{
@@ -99,17 +104,16 @@ data(iris)
 iris <- iris[,1:4]
 
 # Train Gsom Model
-gsom.iris <- train.gsom(iris)
+gsom_iris <- train.gsom(iris)
 
 # Some more Parameters
-gsom.iris <- train.gsom(iris, spreadFactor=0.95, keepdata=TRUE, iterations=30, alpha=0.5, gridsize = FALSE, nhood= "rect")
+gsom_iris <- train.gsom(iris, spreadFactor=0.95, keepdata=TRUE, iterations=30, alpha=0.5, gridsize = FALSE, nhood= "rect")
 
 # Fixed Grid size
-gsom.iris <- train.gsom(iris, iterations=30, gridsize = 10)
+gsom_iris <- train.gsom(iris, iterations=30, gridsize = 10)
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{ Growing }
 \keyword{ GSOM }
 \keyword{ Self-Organizing }

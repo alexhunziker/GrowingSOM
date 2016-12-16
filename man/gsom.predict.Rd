@@ -4,18 +4,19 @@
   Predict function for gsom
 }
 \description{
-  Map objects to a trained GSOM map, and return for each object the property associated with the corresponding winning unit. 
+  Map objects to a supervised GrowingSOM map, and return for each object the property associated with the corresponding winning node. 
 }
 \usage{
   predict.gsom(gsom_object, df, retaindata = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{df}{
-    Matrix or Dataframe of observations for which the Y values should be predicted.
-  }
   \item{gsom_object}{
     a trained supervised gsom object. (see train_xy.gsom)
+  }
+  \item{df}{
+    Matrix or Dataframe of observations for which the Y values should be predicted.\cr
+    Columns of this input argument must be corresponding to the ones used as data when training the map.
   }
   \item{retaindata}{
     logical. If set to TRUE a copy of the mapped data (df) is stored as a copy in the returned gsom object.
@@ -27,21 +28,21 @@
     Coordinates of the units of the map (copied from the input gsom map)
   }
   \item{nodes$codes}{
-    a matrix containing the codes for each variable of each unit (copied from the input gsom map)
+    a matrix containing the codes for each variable of each node (copied from the input gsom map)
   }
   \item{nodes$predict}{
     a matrix containing the codes for each property that are to be modelled (copied from the input gsom map)
   }
   \item{nodes$freq}{
-    the number of observations that were mapped to each unit.
+    the number of observations that were mapped to each node.
   }
   \item{prediction$bmn}{
-    best matching unit for each observation provided.
+    best matching node for each observation provided.
   }
   \item{prediction$dist}{
     distance measurement of observations to their best matching units.
   }
-  \item{prediction$predict}{
+  \item{prediction$value}{
     prediction for the modelled properties for each observation.
   }
 }
@@ -76,12 +77,10 @@
   iris_d_te = iris_d[testsample,]
   
   # Train a GSOM map
-  gsom_map = train_xy.gsom(iris_d_tr, spreadFactor = 0.99)
+  gsom_map = train_xy.gsom(iris_d_tr, iris_p_tr, spreadFactor = 0.9)
   
   # Predict
   gsom_predict = predict.gsom(gsom_map, iris_d_te)
-  
-  # The predicted values can now be compared with iris_p_te
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

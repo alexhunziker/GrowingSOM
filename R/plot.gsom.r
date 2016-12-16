@@ -15,12 +15,14 @@
 #   plotted can be indicated.
 # Returns: nothing
 
-plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
+plot.gsom <- function(gsom_object, type="count", colors=NULL, dim=0, main="", ...){
   
   if(!exists("gsom_object")) stop("GSOM object (trained model or mapped data) has to be provided.")
   
   if(type == "count"){
     
+    if(is.null(colors)) colors = list(c(0.9,0),c(0.9,0),c(0.9,1))
+    
     hlim = max(max(gsom_object$nodes$position[, 1])-min(gsom_object$nodes$position[, 1]), 
                max(gsom_object$nodes$position[, 2])-min(gsom_object$nodes$position[, 2]))/2 + 0.5
     hx = (max(gsom_object$nodes$position[, 1])+min(gsom_object$nodes$position[, 1]))/2
@@ -28,17 +30,19 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="n", main=paste("Density (Observations per unit)"), xlab="", ylab="", xaxt='n', yaxt='n',
-         xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
+         type="n", main=paste("Observations per node"), xlab="", ylab="", xaxt='n', yaxt='n',
+         xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3, ...)
     symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
             circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$freq,c(0.9,0),c(0.9,0),c(0.9,1)))
+            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$freq,colors[[1]],colors[[2]],colors[[3]]))
     plot_scale(zlim=c(min(gsom_object$nodes$freq),max(gsom_object$nodes$freq)),
-               col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),c(0.9,0),c(0.9,0),c(0.9,1)))
+               col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),colors[[1]],colors[[2]],colors[[3]]))
     par(mar=c(5.1,4.1,4.1,2.1))
     
   }else if(type == "dist"){
     
+    if(is.null(colors)) colors = list(c(0.9,0),c(0.9,0),c(0.9,1))
+    
     hlim = max(max(gsom_object$nodes$position[, 1])-min(gsom_object$nodes$position[, 1]), 
                max(gsom_object$nodes$position[, 2])-min(gsom_object$nodes$position[, 2]))/2 + 0.5
     hx = (max(gsom_object$nodes$position[, 1])+min(gsom_object$nodes$position[, 1]))/2
@@ -46,31 +50,23 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     par(mar=c(5.1,4.1,4.1,5.5))
     plot(gsom_object$nodes$position$x, 
          gsom_object$nodes$position$y, 
-         type="n", main=paste("Avgerage Euclidan Distance From BMN"), xlab="", ylab="", xaxt='n', yaxt='n',
+         type="n", main=paste("Avgerage Distance From BMN"), xlab="", ylab="", xaxt='n', yaxt='n',
          xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3, 
-         col=plotrix::color.scale(gsom_object$nodes$error,c(0.9,0),c(0.9,0),c(0.9,1))
+         col=plotrix::color.scale(gsom_object$nodes$error,colors[[1]],colors[[2]],colors[[3]]), ...
     )
     symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
             circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$error,c(0.9,0),c(0.9,0),c(0.9,1)))
+            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$error,colors[[1]],colors[[2]],colors[[3]]))
     minattr <- min(gsom_object$nodes$error)
     maxattr <- max(gsom_object$nodes$error)
     scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
     plot_scale(zlim=c(min(gsom_object$nodes$error),max(gsom_object$nodes$error)),
-               col=plotrix::color.scale(scale,c(0.9,0),c(0.9,0),c(0.9,1)))
+               col=plotrix::color.scale(scale,colors[[1]],colors[[2]],colors[[3]]))
     par(mar=c(5.1,4.1,4.1,2.1))
     
   } else if(type == "dist_neighbours") {
     
-    stop("Missing Feature. Sorry...")
-    plot(gsom_object$nodes$position$x, 
-         gsom_object$nodes$position$y, 
-         type="n", main=paste("Density"), xlab="", ylab="", xaxt='n', yaxt='n',
-         pch=16, cex=3, col=grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2)
-    )
-    symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
-            circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-            add = TRUE, bg=grey((gsom_object$nodes$error/max(gsom_object$nodes$error))^2))
+    stop("Plot cannot be generated. Reason: Missing Feature.")
     
   } else if(type == "training") {
     
@@ -81,13 +77,15 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     plot(x=gsom_object$training$iteration[gsom_object$training$training_stage==1], 
          y=gsom_object$training$meandist[gsom_object$training$training_stage==1], col=2, type="l",
          main=main, xlab="Number of iterations", ylab="Mean Distance to Unit", xlim = c(0, length(gsom_object$training$iteration)),
-         ylim = c(min(gsom_object$training$meandist), max(gsom_object$training$meandist)))
+         ylim = c(min(gsom_object$training$meandist), max(gsom_object$training$meandist)), ...)
     points(x=gsom_object$training$iteration[gsom_object$training$training_stage==2], 
          y=gsom_object$training$meandist[gsom_object$training$training_stage==2], col=3, type="l")
     legend(length(gsom_object$training$meandist)*0.65, max(gsom_object$training$meandist), 
            legend=c("Growing Phase", "Smoothing Phase"), col=c(2, 3), lty=1, cex=0.8, lwd=2)
     
   } else if(type == "property") {
+    
+    if(is.null(colors)) colors = list(c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15))
     
     par(mar=c(5.1,4.1,4.1,5.5))
     if(any(dim > ncol(gsom_object$nodes$codes))) stop("Invalid value for parameter dim.")
@@ -96,7 +94,7 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
     if(main == "") gennames = TRUE
     for(i in dim){ #should eventually be changed to colnames. For works there as well
       
-      if(exists("gennames")) main <- paste("Property:", colnames(gsom_object$nodes$codes[i]))
+      if(exists("gennames")) main <- paste("Property:", colnames(gsom_object$nodes$codes)[i])
       
       minattr <- gsom_object$norm_param[i,1]
       maxattr <- gsom_object$norm_param[i,2]
@@ -112,18 +110,20 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
       plot(gsom_object$nodes$position$x, 
            gsom_object$nodes$position$y, 
            type="n", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
-           xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
+           xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3, ...)
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$codes[,i],c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
+              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$codes[,i],colors[[1]],colors[[2]],colors[[3]]))
       plot_scale(zlim=c(minattr,maxattr),
-                 col=plotrix::color.scale(scale,c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
+                 col=plotrix::color.scale(scale,colors[[1]],colors[[2]],colors[[3]]))
       
     }
     
     par(mar=c(5.1,4.1,4.1,2.1))
     
   } else if(type == "predict") {
+    
+    if(is.null(colors)) colors = list(c(0.5,1), c(1,0.5), c(0.4,0.8))
     
     par(mar=c(5.1,4.1,4.1,5.5))
     if(any(dim > ncol(gsom_object$nodes$predict))) stop("Invalid value for parameter dim.")
@@ -148,12 +148,12 @@ plot.gsom <- function(gsom_object, type="count", dim=0, main=""){
       plot(gsom_object$nodes$position$x, 
            gsom_object$nodes$position$y, 
            type="n", main=main, xlab="", ylab="", xaxt='n', yaxt='n',
-           xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3)
+           xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3, ...)
       symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
               circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$predict[,i],c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
+              add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$predict[,i],colors[[1]],colors[[2]],colors[[3]]))
       plot_scale(zlim=c(minattr,maxattr),
-                 col=plotrix::color.scale(scale,c(0.15,0.95,0.7),c(0.4,0.95,0.1),c(0.65,0.95,0.15)))
+                 col=plotrix::color.scale(scale,colors[[1]],colors[[2]],colors[[3]]))
       
     }
     
