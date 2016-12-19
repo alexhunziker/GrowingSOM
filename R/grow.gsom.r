@@ -17,7 +17,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
   
   lrinit <- 0.9
   
-  initnodes <- gridsize*round(gridsize/2,0)
+ initnodes <- gridsize*gridsize
 
 	if(is.null(initrad)){
 		if(grow==1) radius = 3  # Arbitrary default value
@@ -38,23 +38,32 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
   
   npos <- matrix(0, nrow=lentn, ncol=2)
   #npos[1:initnodes,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
+  
+  
   if(nhood=="rect"){
     hex = 0
     for(i in 1:gridsize){
       for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i, j)
     }
   }else{
+    
     hex = 1
+    counter = 1
+    
     for(i in 1:gridsize){
-      if(i/2 - round(i/2,0) != 0) q=0.5
-      else q=0
-      for(j in 1:(round(gridsize/2,0))) {
-        npos[round(gridsize/2,0)*(i-1)+j,] = c((i/2), (j+q)*1.50)
+      for(j in 1:floor(gridsize/2)){
+        npos[counter,] = c(i, 1.5*j)
+        npos[counter +1,] = c((i-0.5), (1.5*j+0.75))
+        counter = counter + 2
+      }
+      if(gridsize %% 2 != 0){
+        npos[counter,] = c(i, 1.5*(j+1))
+        counter = counter + 1
       }
     }
   }
   
-  if(repet > lentr) error("Max nr of iterations exceeded.")
+  if(repet > lentr) stop("Max nr of iterations exceeded.")
   
   currtrain <- matrix(0, nrow=lentr, ncol=5)
   
@@ -99,7 +108,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
   nodes <- list(
     position = data.frame(npos),
     codes = data.frame(codes),
-    error = distnd,
+    distance = distnd,
     freq = freq
   )
   

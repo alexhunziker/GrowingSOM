@@ -41,18 +41,20 @@ predict.gsom <- function(gsom_object, df, retaindata=FALSE){
   colnames(predict) = colnames(gsom_object$nodes$predict)
   for(i in (1:nrow(df))){
     predict[i,] = gsom_object$nodes$predict[bmn[i,1],]
+    #predict[i,] = tmp*(maxy-miny)+miny
   }
-  
+
   cy = ncol(gsom_object$nodes$predict)
 
   gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
   
   gsom_mapped = list();
   gsom_mapped[["nodes"]] = gsom_object$nodes
-  gsom_mapped[["nodes"]]$error = NULL
+  gsom_mapped[["nodes"]]$distance = NULL
   gsom_mapped[["nodes"]]$freq = outc$freq
   gsom_mapped[["prediction"]] = data.frame(bmn=bmn, dist=dist, value=predict)
-  gsom_mapped[["norm_param"]] = gsom_object$scale
+  gsom_mapped[["norm_param"]] = gsom_object$norm_param
+  gsom_mapped[["norm_param_y"]] = gsom_object$norm_param_y
   if(retaindata) gsom_mapped[["data"]] = df;
   
   class(gsom_mapped) = "gsom"

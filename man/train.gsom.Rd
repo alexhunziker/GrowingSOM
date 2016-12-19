@@ -8,9 +8,9 @@
   Computes a growing self-organizing map for mapping high-dimendional data to 2D. 
 }
 \usage{
-  train.gsom(data, spreadFactor=0.9, keepdata=FALSE, 
+  train.gsom(data, spreadFactor=0.8, keepdata=FALSE, 
       iterations=50, alpha=0.9, beta = 0.5, gridsize = FALSE, 
-      nhood= "rect", initrad)
+      nhood= "rect", initrad = NULL)
 }
 
 \arguments{

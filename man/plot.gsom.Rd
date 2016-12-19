@@ -8,7 +8,7 @@
   Plot growing self-organising maps, obtained from functions of the GrowingSOM package. Several types of plots are supported.
 }
 \usage{
-  plot.gsom(gsom_object, type = "count", colors=NULL, dim = 0, main = "")
+  plot.gsom(gsom_object, type = "count", colors=NULL, dim = 0, main = "", ...)
 }
 \arguments{
   \item{gsom_object}{
@@ -27,9 +27,9 @@
   }
   \item{colors}{
     colors to be used to generate the plots. If set to NULL, the default colors will be used. Format: list(red, green, blue)\cr
-    \code{Examples:\cr 
-        colors = list(c(0.1, 0.9), c(0.1, 0.9), c(0.1, 0.9))   For gray scale\cr 
-        colors = list(c(1.0, 0.0), c(0.0, 1.0), c(0.0, 0.0))   Red to green}
+    Examples: \cr
+    \code{colors = list(c(0.1, 0.9), c(0.1, 0.9), c(0.1, 0.9))   For gray scale}
+    \code{colors = list(c(1.0, 0.0), c(0.0, 1.0), c(0.0, 0.0))   Red to green}
   }
   \item{main}{
     changes the title of the plots
@@ -52,13 +52,13 @@
   iris_d = iris[,1:4]
   
   # Train a GSOM map
-  gsom_map = train.gsom(iris_d_tr, spreadFactor = 0.99)
+  gsom_map = train.gsom(iris_d, spreadFactor = 0.9)
   
   # Counts
   plot(gsom_map)
   
   # Properties
-  plot(gsom_map, type = "properties")
+  plot(gsom_map, type = "property")
   
   # Training
   plot(gsom_map, type = "training")

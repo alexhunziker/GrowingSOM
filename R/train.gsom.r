@@ -21,7 +21,7 @@ train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, al
   
   if(gridsize == FALSE) gridsize=2
   else if(!is.numeric(gridsize)){
-    error("Grid size must be nummeric (for classical kohonen map) or FALSE (for Growing SOM).")
+    stop("Grid size must be nummeric (for classical kohonen map) or FALSE (for Growing SOM).")
   }
 
   t1 <- Sys.time()

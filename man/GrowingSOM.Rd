@@ -32,10 +32,11 @@
 \keyword{ Map }
 \keyword{ GrowingSOM }
 \keyword{ GSOM }
-\seealso{
-    Non-growing Self-Organizing maps:\cr
-      \code{\link[<pkg>:<kohonen>-package]{<kohonen>-package}}
-}
+%%\seealso{
+%%    Non-growing Self-Organizing maps:\cr
+%%    %\pkg{roxygen2}
+%%      %%\code{\link[<kohonen>:<kohonen>-package]{<kohonen>-package}}
+%%}
 \examples{
 
   # Get some data

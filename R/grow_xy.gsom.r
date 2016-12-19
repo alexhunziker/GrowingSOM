@@ -9,15 +9,14 @@
 # The performance intensive loop has been outsourced to C for performance reasons.
 
 #Mainly calls the C loop and processes returned data
-grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, grow, initrad){
+grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhood, grow, initrad){
 
   # Set some parameters
   lentr <- 10000
   lentn <- 10000
   
   lrinit <- 0.9
-  alpha <- 0.9 #Learning Rate Depreciation factor.
-  
+
   if(is.null(initrad)){
     if(grow==1) radius = 3  # Arbitrary default value
     else radius = sqrt(gridsize)
@@ -42,21 +41,34 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
   gt = -ncol(df) * log(spreadFactor) * 0.01*nrow(df)
   
   npos <- matrix(0, nrow=lentn, ncol=2)
-  #npos[1:initnodes,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
+
   if(nhood=="rect"){
+    
+    hex = 0
+    
     for(i in 1:gridsize){
       for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i, j)
     }
+    
   }else{
-    error("Missing Feature.")
+    
+    hex = 1
+    counter = 1
+    
     for(i in 1:gridsize){
-      if(i/2 - rounded(i/2,0) != 0) q=0.5
-      else q=0
-      for(j in 1:gridsize) npos[gridsize*(i-1)*j,] = c(i+q, (j+q)*1.5)
+      for(j in 1:floor(gridsize/2)){
+        npos[counter,] = c(i, 1.5*j)
+        npos[counter +1,] = c((i-0.5), (1.5*j+0.75))
+        counter = counter + 2
+      }
+      if(gridsize %% 2 != 0){
+        npos[counter,] = c(i, 1.5*(j+1))
+        counter = counter + 1
+      }
     }
   }
   
-  if(repet > lentr) error("Max nr of iterations exceeded.")
+  if(repet > lentr) stop("Max nr of iterations exceeded.")
   
   currtrain <- matrix(0, nrow=lentr, ncol=5)
   
@@ -74,6 +86,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
             plrinit = as.double(lrinit),
             freq = as.double(freq),
             alpha = as.double(alpha), #for lr depreciation
+            beta = as.double(beta), #for depreciation of neighbour learning
             pdim = as.integer(ncol(df)),
             gt = as.double(gt), # Growth Rate
             npos = as.double(npos),
@@ -82,7 +95,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
             plentd = as.integer(nrow(df)),
             currtrain = as.double(currtrain),
             plentr = as.integer(lentr), #Max num of iterations
-            hex = as.integer(0),
+            hex = as.integer(hex),
             grow = as.integer(grow),
             y = as.double(y),
             leny = as.integer(nrow(y)),
@@ -113,7 +126,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, gridsize, nhood, gro
     position = data.frame(npos),
     codes = data.frame(codes),
     predict = data.frame(predict),
-    error = distnd,
+    distance = distnd,
     freq = freq
   )
   

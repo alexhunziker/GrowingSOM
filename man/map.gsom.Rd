@@ -63,7 +63,7 @@ map.gsom(gsom_object, df, retaindata = FALSE)
   gsom_iris <- train.gsom(train_set, spreadfactor=0.75)
 
   # Mapping
-  mapped_iris <- map(gsom_iris, test_set)
+  mapped_iris <- map.gsom(gsom_iris, test_set)
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

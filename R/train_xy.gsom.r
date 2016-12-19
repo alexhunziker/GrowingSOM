@@ -8,7 +8,7 @@
 # gsom.train() is the main function, which should be called by the user.
 # The performance intensive loop has been outsourced to C for performance reasons.
 
-train_xy.gsom <- function(data, y, spreadFactor=0.8, keepdata=FALSE, iterations=50, alpha=0.5, gridsize = FALSE, nhood= "rect", initrad = NULL, ...){
+train_xy.gsom <- function(data, y, spreadFactor=0.8, keepdata=FALSE, iterations=50, alpha=0.9, beta=0.5, gridsize = FALSE, nhood= "rect", initrad = NULL, ...){
   
   # Normalizing the training or testdata (min/max) in order to balance the impact
   # of the different properties of the dataframe
@@ -29,22 +29,20 @@ train_xy.gsom <- function(data, y, spreadFactor=0.8, keepdata=FALSE, iterations=
   
   if(gridsize == FALSE) gridsize=2
   else if(!is.numeric(gridsize)){
-    error("Grid size must be nummeric (for classical kohonen map) or FALSE (for Growing SOM).")
+    stop("Grid size must be nummeric (for classical kohonen map) or FALSE (for Growing SOM).")
   }
   
   t1 <- Sys.time()
-  gsom_object <- grow_xy.gsom(y, df, iterations, spreadFactor, alpha, gridsize, nhood, grow, initrad = initrad)
+  gsom_object <- grow_xy.gsom(y, df, iterations, spreadFactor, alpha, beta, gridsize, nhood, grow, initrad = initrad)
   t2 <- Sys.time()
   print(t2-t1)
 
 	gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*ifelse(maxx==minx,1,(maxx-minx))+minx)}))
-	if(cy > 1) gsom_object$nodes$predict <- t(apply(gsom_object$nodes$predict, 1, function(x){(x*ifelse(maxy==miny,1,(maxy-miny))+miny)}))
-  else gsom_object$nodes$predict <- matrix(apply(gsom_object$nodes$predict, 1, function(x){(x-miny)/ifelse(maxy==miny,1,(maxy-miny))}), ncol=1)
-  
+ 
 	#convert data types if only one variable to be predicted.
 	if(cy==1) {
 	  gsom_object$nodes$predict <- data.frame(gsom_object$nodes$predict)
-	  data.frame(apply(gsom_object$nodes$predict, 1, function(x){(x*ifelse(maxy==miny,1,(maxy-miny))+miny)}))
+	  gsom_object$nodes$predict <- data.frame(apply(gsom_object$nodes$predict, 1, function(x){(x*(maxy-miny)+miny)}))
 	}
 	else gsom_object$nodes$predict <- t(apply(gsom_object$nodes$predict, 1, function(x){(x*ifelse(maxy==miny,1,(maxy-miny))+miny)}))
   colnames(gsom_object$nodes$predict) = colnames(y)

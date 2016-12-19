@@ -6,7 +6,7 @@
 
 # This function will plot the standard gsom plots, namely:
 #   -Count Frequency of nodes (count)
-#   -Distance within a node (dist)
+#   -Distance within a node (distance)
 #   -Distance to neighbouring nodes (dist_neighbours)
 #   -Learning Process per Iteration (Average Mean Error) (training)
 #   -Plot of Properties (property)
@@ -39,7 +39,7 @@ plot.gsom <- function(gsom_object, type="count", colors=NULL, dim=0, main="", ..
                col=plotrix::color.scale(min(gsom_object$nodes$freq):max(gsom_object$nodes$freq),colors[[1]],colors[[2]],colors[[3]]))
     par(mar=c(5.1,4.1,4.1,2.1))
     
-  }else if(type == "dist"){
+  }else if(type == "distance"){
     
     if(is.null(colors)) colors = list(c(0.9,0),c(0.9,0),c(0.9,1))
     
@@ -52,15 +52,15 @@ plot.gsom <- function(gsom_object, type="count", colors=NULL, dim=0, main="", ..
          gsom_object$nodes$position$y, 
          type="n", main=paste("Avgerage Distance From BMN"), xlab="", ylab="", xaxt='n', yaxt='n',
          xlim = c(hx-hlim, hx+hlim), ylim=c(hy-hlim, hy+hlim), pch=16, cex=3, 
-         col=plotrix::color.scale(gsom_object$nodes$error,colors[[1]],colors[[2]],colors[[3]]), ...
+         col=plotrix::color.scale(gsom_object$nodes$distance,colors[[1]],colors[[2]],colors[[3]]), ...
     )
     symbols(gsom_object$nodes$position[, 1], gsom_object$nodes$position[, 2],
             circles = rep(0.4, nrow(gsom_object$nodes$position)), inches = FALSE,
-            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$error,colors[[1]],colors[[2]],colors[[3]]))
-    minattr <- min(gsom_object$nodes$error)
-    maxattr <- max(gsom_object$nodes$error)
+            add = TRUE, bg=plotrix::color.scale(gsom_object$nodes$distance,colors[[1]],colors[[2]],colors[[3]]))
+    minattr <- min(gsom_object$nodes$distance)
+    maxattr <- max(gsom_object$nodes$distance)
     scale <- seq(minattr, maxattr, by=(maxattr-minattr)/100)
-    plot_scale(zlim=c(min(gsom_object$nodes$error),max(gsom_object$nodes$error)),
+    plot_scale(zlim=c(min(gsom_object$nodes$distance),max(gsom_object$nodes$distance)),
                col=plotrix::color.scale(scale,colors[[1]],colors[[2]],colors[[3]]))
     par(mar=c(5.1,4.1,4.1,2.1))
     

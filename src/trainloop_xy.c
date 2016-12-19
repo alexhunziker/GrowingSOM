@@ -22,7 +22,7 @@ struct nodelist *get_neighbours_xy(double *npos, int lennd, int lentn, struct no
 void clear_ll_xy(struct nodelist *root);
 
 void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Sint *plendf,
-		Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
+		Sint *plennd, double *plrinit, double *freq, double *alpha, double *beta, Sint *pdim, double *gt, double *npos, double *pradius,
 		Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow, double *y, Sint *leny, Sint *pydim, double *predict){
 
 	//Convert pointers
@@ -38,9 +38,9 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 	double dist, tmp, dm, lr, errorsum, radius;
 	int nodegrow, x, w=4;
 	struct nodelist *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
-	double sr = 0.5;
-
-	if(*leny != lendf) error("%d, %d, matrixes must have the same number of rows", (int)*leny, lendf);
+	double sr = *beta;
+  
+	if((int)*leny != lendf) error("%d, %d, matrixes must have the same number of rows", (int)*leny, lendf);
 
 	if(*hex==1){
 	  w=6;
@@ -239,7 +239,6 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 							if(nneigh -> next != NULL){
 
 								//Case B (More than one direct neighbour exists)
-								//printf("B");
 
 								for(n=0; n<dim; n++){
 									codes[lennd-1 + n*lentn] = (codes[nneigh -> nodeid + n*lentn] + codes[nneigh -> next -> nodeid + n*lentn]) / 2;
@@ -296,7 +295,6 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 
 									//Case A (Parent node w1 has a node w2 lying in the same direction as w1 lies in respect to new node)
 									w2 = tmp;
-									//printf("A");
 									for(o=0; o < dim; o++){
 										if(codes[w1 + o*lentn] < codes[w2 + o*lentn]){
 											codes[lennd-1 + lentn*o] = codes[w1 + o*lentn]-(codes[w2 + o*lentn] - codes[w1 + o*lentn]);
@@ -318,7 +316,6 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 
 									//Case D (only direct neghbour of new nowde has no neighbours)
 									//Initialize w. average codes according to paper.
-									printf("D");
 									for(o=0; o<dim; o++){
 
 										//Find min and max for each weight
@@ -343,7 +340,6 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 								}else{
 
 									//Case C (Parent node w1 has neighbours but none that qualifies for case A)
-									//printf("C");
 									w2 = nonneigh -> nodeid; //Random existing neighbour of nearest.
 
 									for(o=0; o < dim; o++){
@@ -437,12 +433,12 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			phase = 2;
 		}
 
-		printf(".");
+		Rprintf(".");
 
 	}
 
 	//Iteration i is completed
-	printf("\n");
+	Rprintf("\n");
 
 	//Update Return Values
 	*plennd = lennd;
@@ -495,7 +491,6 @@ struct nodelist *get_neighbours_xy(double *npos, int lennd, int lentn, struct no
 
         //Add Node to new LL
         if(exclude == 0){
-          //printf("Added node %d to linked list.\n", l);
           tmp = (struct nodelist *) malloc( sizeof(struct nodelist) );
           tmp -> next = nroot;
           tmp -> nodeid = l;

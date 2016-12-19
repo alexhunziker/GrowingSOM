@@ -39,7 +39,7 @@ map.gsom <- function(gsom_object, df, retaindata=FALSE){
 
   gsom_mapped = list();
   gsom_mapped[["nodes"]] = gsom_object$nodes
-  gsom_mapped[["nodes"]]$error = NULL
+  gsom_mapped[["nodes"]]$distance = NULL
   gsom_mapped[["nodes"]]$freq = outc$freq
   gsom_mapped[["mapped"]] = data.frame(bmn=bmn, dist=dist)
   gsom_mapped[["norm_param"]] = gsom_object$scale

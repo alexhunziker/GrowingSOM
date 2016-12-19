@@ -24,7 +24,7 @@ void print_ll(struct nodelist *root);
 
 
 void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Sint *plendf,
-                       Sint *plennd, double *plrinit, double *freq, double *alpha, Sint *pdim, double *gt, double *npos, double *pradius,
+                       Sint *plennd, double *plrinit, double *freq, double *alpha, double *beta, Sint *pdim, double *gt, double *npos, double *pradius,
                        Sint *plentn, Sint *plentd, double *currtrain, Sint *plentr, Sint *hex, Sint *grow, double *y, Sint *leny, Sint *pydim, double *predict);
 
 void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint *plendf,
@@ -238,7 +238,6 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 							if(nneigh -> next != NULL){
 
 								//Case B (More than one direct neighbour exists)
-								//printf("B");
 
 								for(n=0; n<dim; n++){
 									codes[lennd-1 + n*lentn] = (codes[nneigh -> nodeid + n*lentn] + codes[nneigh -> next -> nodeid + n*lentn]) / 2;
@@ -292,7 +291,7 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 
 									//Case A (Parent node w1 has a node w2 lying in the same direction as w1 lies in respect to new node)
 									w2 = tmp;
-									//printf("A");
+								  
 									for(o=0; o < dim; o++){
 										if(codes[w1 + o*lentn] < codes[w2 + o*lentn]){
 											codes[lennd-1 + lentn*o] = codes[w1 + o*lentn]-(codes[w2 + o*lentn] - codes[w1 + o*lentn]);
@@ -306,7 +305,6 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 
 									//Case D (only direct neghbour of new nowde has no neighbours)
 									//Initialize w. average codes according to paper.
-									printf("D");
 									for(o=0; o<dim; o++){
 
 										//Find min and max for each weight
@@ -324,7 +322,7 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 								}else{
 
 									//Case C (Parent node w1 has neighbours but none that qualifies for case A)
-									//printf("C");
+
 									w2 = nonneigh -> nodeid; //Random existing neighbour of nearest.
 
 									for(o=0; o < dim; o++){
@@ -415,12 +413,12 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 			}
 		}
 		printf(" |\n");*/
-		printf(".");
+		Rprintf(".");
 
 	}
 
 	//Iteration i is completed
-	printf("\n");
+	Rprintf("\n");
 
 	//Update Return Values
 	*plennd = lennd;
@@ -444,8 +442,6 @@ struct nodelist *get_neighbours(double *npos, int lennd, int lentn, struct nodel
 	nroot = NULL;
 	rorigin = origin;
 
-	//printf("old");
-	//print_ll(origin);
 
 	//Origin is a linked list containing of n nodes, to which neighbours should be found
 	if(origin == NULL) error("Linked list which should contain at least one origin is empty.");
@@ -477,14 +473,12 @@ struct nodelist *get_neighbours(double *npos, int lennd, int lentn, struct nodel
 
 				//Add Node to new LL
 				if(exclude == 0){
-					//printf("-%d-", l);
 					tmp = (struct nodelist *) malloc( sizeof(struct nodelist) );
 					tmp -> next = nroot;
 					tmp -> nodeid = l;
 					tmp -> adrate = adrate;
 					nroot = tmp;
 				}
-				//printf(",%d,", exclude);
 
 			}
 
@@ -493,9 +487,6 @@ struct nodelist *get_neighbours(double *npos, int lennd, int lentn, struct nodel
 		origin = origin -> next;
 
 	}
-
-	//printf("new");
-	//print_ll(nroot);
 
 	return nroot;
 
@@ -516,8 +507,8 @@ void clear_ll(struct nodelist *root){
 //For debugging
 void print_ll(struct nodelist *root){
 	while(root != NULL){
-		printf("NodeId = %d, Adrate=%f", root -> nodeid, root -> adrate);
+		Rprintf("NodeId = %d, Adrate=%f", root -> nodeid, root -> adrate);
 		root = root -> next;
 	}
-	printf("\n");
+	Rprintf("\n");
 }
