@@ -12,7 +12,7 @@
 grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhood, grow, initrad){
 
   # Set some parameters
-  lentr <- 10000
+  lentr <- 1000
   lentn <- 10000
   
   lrinit <- 0.9
