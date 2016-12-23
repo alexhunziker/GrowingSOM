@@ -7,8 +7,8 @@
   Map a data matrix onto a trained gsom object.
 }
 \usage{
-## S3 method for class 'gsom'
-map.gsom(gsom_object, df, retaindata = FALSE)
+  ## S3 method for class 'gsom'
+  map.gsom(gsom_object, df, retaindata = FALSE, ...)
 }
 
 \arguments{
@@ -20,6 +20,9 @@ map.gsom(gsom_object, df, retaindata = FALSE)
   }
   \item{retaindata}{
     if set to TRUE a copy of the mapped data (unscaled) will be added to the returned object.
+  }
+  \item{...}{
+    not used.
   }
 }
 
@@ -68,10 +71,6 @@ map.gsom(gsom_object, df, retaindata = FALSE)
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~GSOM }
-\keyword{ ~SOM }
-\keyword{ ~Self }
-\keyword{ ~Organizing }
-\keyword{ ~Map }
-\keyword{ ~Growing }
-\keyword{ ~Map }
+\keyword{ GSOM }
+\keyword{ GrowingSOM }
+\keyword{ Map }

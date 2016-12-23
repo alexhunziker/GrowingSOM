@@ -8,9 +8,9 @@
   Computes a supervised growing self-organizing map for mapping high-dimendional data to 2D. 
 }
 \usage{
-  train.gsom(data, y, spreadFactor=0.8, keepdata=FALSE, 
+  train_xy.gsom(data, y, spreadFactor=0.8, keepdata=FALSE, 
       iterations=50, alpha=0.9, beta = 0.5, gridsize = FALSE, 
-      nhood= "rect", initrad = NULL)
+      nhood= "rect", initrad = NULL, ...)
 }
 
 \arguments{
@@ -44,6 +44,9 @@
   \item{initrad}{
     if the gridsize is predetermined, the initial radius can be chosen here. If left blank, the square root of gridsize will be taken. \cr
     A larger initrad can increase the quality of the clustering. However, the script can get very slow when a too large value is chosen. (number of necessary computations rises exponentially)
+  }
+  \item{...}{
+    not used.
   }
 }
 \details{
@@ -105,23 +108,30 @@
 }
 \examples{
 
-# load data
-data(iris)
-iris[,5] <- as.numeric(iris[,5])
+  # load data
+  data("auto_mpg")
+  s = sample(1:392, 300)
+  train_set = auto_mpg[s,1:8]
 
-# Train Gsom Model
-gsom_iris <- train_xy.gsom(iris[,1:4], iris[,5])
+  # Train Gsom Model
+  gsom_object <- train_xy.gsom(train_set[,2:8], train_set[,1], spreadFactor = 0.9)
 
-# Fixed Grid size
-gsom_iris <- train.gsom(iris, iterations=30, gridsize = 10)
+  # Fixed Grid size
+  gsom_object <- train_xy.gsom(train_set[,2:8], train_set[,1], gridsize = 6)
+
+  # Train Gsom Model (hexagonal grid)
+  gsom_object <- train_xy.gsom(train_set[,2:8], train_set[,1], spreadFactor = 0.9, nhood="hex")
+
+  # Plot Predicted values for each node
+  plot(gsom_object)
+  par(mfrow=c(2,2))
+  plot(gsom_object, type = "property")
+  par(mfrow=c(1,1))
+  plot(gsom_object, type = "predict")
 
 }
 
-\keyword{ Growing }
+\keyword{ GrowingSOM }
 \keyword{ GSOM }
-\keyword{ Self-Organizing }
-\keyword{ Map }
-\keyword{ SOM }
 \keyword{ training }
 \keyword{ initialize }
-\keyword{ supervised }

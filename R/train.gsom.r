@@ -10,11 +10,11 @@
 
 train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, alpha=0.9, beta=0.5, gridsize = FALSE, nhood= "rect", initrad = NULL, ...){
   
-  # Normalizing the training or testdata (min/max) in order to balance the impact
+  # Normalizing the training or testdata (mean/sd) in order to balance the impact
   # of the different properties of the dataframe
-  min <- apply(data, 2, function(x){min(x)})
-  max <- apply(data, 2, function(x){max(x)})
-  df <- t(apply(data, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
+  mean <- apply(data, 2, function(x){mean(x)})
+  sd <- apply(data, 2, function(x){sd(x)})
+  df <- t(apply(data, 1, function(x){(x-mean)/ifelse(sd==0,1,sd)}))
   
   if(gridsize==FALSE) grow=1
   else grow=2
@@ -29,9 +29,9 @@ train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, al
   t2 <- Sys.time()
   print(t2-t1)
 
-	gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
+	gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*sd+mean)}))
   
-  norm_param <- data.frame(min = min, max = max)
+  norm_param <- data.frame(mean = mean, sd = sd)
   gsom_object[["norm_param"]] <- norm_param
   
   if(keepdata==TRUE){

@@ -8,10 +8,10 @@
   Plot growing self-organising maps, obtained from functions of the GrowingSOM package. Several types of plots are supported.
 }
 \usage{
-  plot.gsom(gsom_object, type = "count", colors=NULL, dim = 0, main = "", ...)
+\method{plot}{gsom}(x, type = "count", colors=NULL, dim = 0, main = "", \dots)
 }
 \arguments{
-  \item{gsom_object}{
+  \item{x}{
     a gsom object
   }
   \item{type}{
@@ -68,10 +68,6 @@
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~GSOM }
-\keyword{ ~SOM }
-\keyword{ ~Self }
-\keyword{ ~Organizing }
-\keyword{ ~Map }
-\keyword{ ~Growing }
-\keyword{ ~Plot }
+\keyword{ GSOM }
+\keyword{ GrowingSOM }
+\keyword{ Plot }

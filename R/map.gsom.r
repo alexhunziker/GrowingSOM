@@ -10,14 +10,14 @@
 # Returns: mapped_data, which includes the nodes with position of nodes, frequency and average errors
 #   as well as the error and winning node for each node of the testdata
 
-map.gsom <- function(gsom_object, df, retaindata=FALSE){
+map.gsom <- function(gsom_object, df, retaindata=FALSE, ...){
   
-  # Normalizing the training or testdata (min/max) in order to balance the impact
+  # Normalizing the training or testdata (mean/sd) in order to balance the impact
   # of the different properties of the dataframe
-  min <- gsom_object$norm_param$min
-  max <- gsom_object$norm_param$max
-  dfs <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
-  gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
+  mean <- gsom_object$norm_param$mean
+  sd <- gsom_object$norm_param$sd
+  dfs <- t(apply(df, 1, function(x){(x-mean)/ifelse(sd==0,1,sd)}))
+  gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x-mean)/ifelse(sd==0,1,sd)}))
   
   bmn <- rep(0, times=nrow(df))
   ndist <- rep(0, times=nrow(df))
@@ -42,11 +42,10 @@ map.gsom <- function(gsom_object, df, retaindata=FALSE){
   gsom_mapped[["nodes"]]$distance = NULL
   gsom_mapped[["nodes"]]$freq = outc$freq
   gsom_mapped[["mapped"]] = data.frame(bmn=bmn, dist=dist)
-  gsom_mapped[["norm_param"]] = gsom_object$scale
+  gsom_mapped[["norm_param"]] = gsom_object$norm_param
   if(retaindata) gsom_mapped[["data"]] = df
-  if(retaindata) print("hi")
 
-  gsom_mapped$nodes$codes <- t(apply(gsom_mapped$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
+  gsom_mapped$nodes$codes <- t(apply(gsom_mapped$nodes$codes, 1, function(x){(x*sd+mean)}))
   
   class(gsom_mapped) = "gsom"
   

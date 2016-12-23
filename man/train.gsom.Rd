@@ -10,7 +10,7 @@
 \usage{
   train.gsom(data, spreadFactor=0.8, keepdata=FALSE, 
       iterations=50, alpha=0.9, beta = 0.5, gridsize = FALSE, 
-      nhood= "rect", initrad = NULL)
+      nhood= "rect", initrad = NULL, ...)
 }
 
 \arguments{
@@ -43,8 +43,8 @@
     A larger initrad can increase the quality of the clustering. However, the script can get very slow when a too large value is chosen. (number of necessary computations rises exponentially)
   }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
-}
+    not used.
+  }
 }
 \details{
   Euclidean distance is used in order to calculate the distances.
@@ -92,8 +92,6 @@
   The decrease of neighbourhood size only takes place in phase two and happens on a linear basis from the specified start value to 0.
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
   train_xy.gsom, map.gsom, plot.gsom
 }
@@ -114,10 +112,7 @@ gsom_iris <- train.gsom(iris, iterations=30, gridsize = 10)
 
 }
 
-\keyword{ Growing }
+\keyword{ GrowingSOM }
 \keyword{ GSOM }
-\keyword{ Self-Organizing }
-\keyword{ Map }
-\keyword{ SOM }
 \keyword{ training }
 \keyword{ initialize }

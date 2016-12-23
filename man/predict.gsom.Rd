@@ -7,11 +7,11 @@
   Map objects to a supervised GrowingSOM map, and return for each object the property associated with the corresponding winning node. 
 }
 \usage{
-  predict.gsom(gsom_object, df, retaindata = FALSE)
+\method{predict}{gsom}(object, df, retaindata = FALSE, \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{gsom_object}{
+  \item{object}{
     a trained supervised gsom object. (see train_xy.gsom)
   }
   \item{df}{
@@ -20,6 +20,9 @@
   }
   \item{retaindata}{
     logical. If set to TRUE a copy of the mapped data (df) is stored as a copy in the returned gsom object.
+  }
+  \item{...}{
+    not used.
   }
 }
 \value{
@@ -46,9 +49,7 @@
     prediction for the modelled properties for each observation.
   }
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
   Alex Hunziker
 }
@@ -62,32 +63,22 @@
   train_xy.gsom, map.gsom
 }
 \examples{
-  # Get some Data
-  data(iris)
+  # load data
+  data("auto_mpg")
+  s = sample(1:392, 300)
+  train_set = auto_mpg[s,1:8]
+  test_set = auto_mpg[-s,1:8]
   
-  # Feature in col 5 should be modelled
-  iris_p = as.numeric(iris[,5])
-  iris_d = iris[,1:4]
+  # Train Gsom Model (hexagonal grid)
+  gsom_map <- train_xy.gsom(train_set[,2:8], train_set[,1], spreadFactor = 0.9, nhood="hex")
   
-  # Devide into test and training sample
-  testsample = sample(1:150, 50)
-  iris_p_tr = iris_p[-testsample]
-  iris_p_te = iris_p[testsample]
-  iris_d_tr = iris_d[-testsample,]
-  iris_d_te = iris_d[testsample,]
+  print(gsom_map)
+  plot(gsom_map, type = "predict")
   
-  # Train a GSOM map
-  gsom_map = train_xy.gsom(iris_d_tr, iris_p_tr, spreadFactor = 0.9)
-  
-  # Predict
-  gsom_predict = predict.gsom(gsom_map, iris_d_te)
+  # Predict mpg for the test set
+  gsom_predictions = predict.gsom(gsom_map, test_set[,2:8])
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~GSOM }
-\keyword{ ~SOM }
-\keyword{ ~Self }
-\keyword{ ~Organizing }
-\keyword{ ~Map }
-\keyword{ ~Growing }
-\keyword{ ~Predict }
+
+\keyword{ GSOM }
+\keyword{ GrowingSOM }
+\keyword{ Predict }

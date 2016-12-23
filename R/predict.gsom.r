@@ -4,30 +4,29 @@
 
 # More pseudocode than anything else
 
-predict.gsom <- function(gsom_object, df, retaindata=FALSE){
+predict.gsom <- function(object, df, retaindata=FALSE, ...){
   
-  if(is.null(gsom_object$nodes$predict)) stop("Wrong input, use trained gsom model for dependent values.")
+  if(is.null(object$nodes$predict)) stop("Wrong input, use trained gsom model for dependent values.")
   
-  # Normalizing the training or testdata (min/max) in order to balance the impact
+  # Normalizing the training or testdata (mean/sd) in order to balance the impact
   # of the different properties of the dataframe
-  min <- gsom_object$norm_param$min
-  max <- gsom_object$norm_param$max
-  df <- as.matrix(df)
-  dfs <- t(apply(df, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
-  gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x-min)/ifelse(max==min,1,(max-min))}))
-  miny <- gsom_object$norm_param_y$miny
-  maxy <- gsom_object$norm_param_y$maxy
+  mean <- object$norm_param$mean
+  sd <- object$norm_param$sd
+  dfs <- t(apply(df, 1, function(x){(x-mean)/ifelse(sd==0,1,sd)}))
+  object$nodes$codes <- t(apply(object$nodes$codes, 1, function(x){(x-mean)/ifelse(sd==0,1,sd)}))
+  meany <- object$norm_param_y$meany
+  sdy <- object$norm_param_y$sdy
 
   bmn <- rep(0, times=nrow(df))
   ndist <- rep(0, times=nrow(df))
-  freq <- rep(0, times=nrow(gsom_object$nodes$codes))
+  freq <- rep(0, times=nrow(object$nodes$codes))
   
   outc = .C("map_data",
             plendf = as.integer(nrow(df)),
-            lennd = as.integer(nrow(gsom_object$nodes$codes)),
-            dim = as.integer(ncol(gsom_object$nodes$codes)),
+            lennd = as.integer(nrow(object$nodes$codes)),
+            dim = as.integer(ncol(object$nodes$codes)),
             df = as.double(dfs),
-            codes =as.double(as.matrix(gsom_object$nodes$codes)), 
+            codes =as.double(as.matrix(object$nodes$codes)), 
             bmn = as.double(bmn),
             ndist = as.double(ndist),
             freq = as.double(freq)
@@ -37,24 +36,24 @@ predict.gsom <- function(gsom_object, df, retaindata=FALSE){
   bmn <- outc$bmn
   bmn = matrix(bmn, ncol= 1)
   
-  predict = data.frame(matrix(ncol=ncol(gsom_object$nodes$predict), nrow=nrow(df)))
-  colnames(predict) = colnames(gsom_object$nodes$predict)
+  predict = data.frame(matrix(ncol=ncol(object$nodes$predict), nrow=nrow(df)))
+  colnames(predict) = colnames(object$nodes$predict)
   for(i in (1:nrow(df))){
-    predict[i,] = gsom_object$nodes$predict[bmn[i,1],]
+    predict[i,] = object$nodes$predict[bmn[i,1],]
     #predict[i,] = tmp*(maxy-miny)+miny
   }
 
-  cy = ncol(gsom_object$nodes$predict)
+  cy = ncol(object$nodes$predict)
 
-  gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*ifelse(max==min,1,(max-min))+min)}))
+  object$nodes$codes <- t(apply(object$nodes$codes, 1, function(x){(x*sd+mean)}))
   
   gsom_mapped = list();
-  gsom_mapped[["nodes"]] = gsom_object$nodes
+  gsom_mapped[["nodes"]] = object$nodes
   gsom_mapped[["nodes"]]$distance = NULL
   gsom_mapped[["nodes"]]$freq = outc$freq
   gsom_mapped[["prediction"]] = data.frame(bmn=bmn, dist=dist, value=predict)
-  gsom_mapped[["norm_param"]] = gsom_object$norm_param
-  gsom_mapped[["norm_param_y"]] = gsom_object$norm_param_y
+  gsom_mapped[["norm_param"]] = object$norm_param
+  gsom_mapped[["norm_param_y"]] = object$norm_param_y
   if(retaindata) gsom_mapped[["data"]] = df;
   
   class(gsom_mapped) = "gsom"

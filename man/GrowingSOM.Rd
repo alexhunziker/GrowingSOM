@@ -26,7 +26,6 @@
   \cr
   Damminda Alahakoon, Saman K. Halgamuge (2000): Dynamic Self-Organizing Maps with Controlled Growth for Knowledge Discovery. IEEE TRANSACTIONS ON NEURAL NETWORKS, VOL. 11.
 }
-\keyword{ package }
 \keyword{ growing }
 \keyword{ self-organizing }
 \keyword{ Map }
@@ -38,6 +37,9 @@
 %%      %%\code{\link[<kohonen>:<kohonen>-package]{<kohonen>-package}}
 %%}
 \examples{
+  ################
+  # Example 1
+  ################
 
   # Get some data
   data("iris")
@@ -49,6 +51,7 @@
   gsom_map <- train.gsom(train_set, spreadFactor=0.8)
   
   # Some Plots
+  plot(gsom_map, type = "training")
   plot(gsom_map, type="count")
   par(mfrow=c(2,2))
   plot(gsom_map, type="property")
@@ -57,5 +60,24 @@
   # Map new data
   gsom_mapped = map.gsom(gsom_map, test_set)
   plot(gsom_mapped)
+  
+  ################
+  # Example 2
+  ################
+  
+  # load data
+  data("auto_mpg")
+  s = sample(1:392, 300)
+  train_set = auto_mpg[s,1:8]
+  test_set = auto_mpg[-s,1:8]
+  
+  # Train Gsom Model (hexagonal grid)
+  gsom_map <- train_xy.gsom(train_set[,2:8], train_set[,1], spreadFactor = 0.9, nhood="hex")
+  
+  print(gsom_map)
+  plot(gsom_map, type = "predict")
+  
+  # Predict mpg for the test set
+  gsom_predictions = predict.gsom(gsom_map, test_set[,2:8])
   
 }
