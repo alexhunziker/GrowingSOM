@@ -87,7 +87,8 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
             currtrain = as.double(currtrain),
             plentr = as.integer(lentr), #Max num of iterations
             hex = as.integer(hex),
-            grow = as.integer(grow)
+            grow = as.integer(grow),
+            PACKAGE = "GrowingSOM"
   )
   
   training <- matrix(outc$currtrain, ncol=5)

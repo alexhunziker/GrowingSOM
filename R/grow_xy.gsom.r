@@ -100,7 +100,8 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhoo
             y = as.double(y),
             leny = as.integer(nrow(y)),
             pydim = as.integer(ncol(y)),
-            predict = as.double(predict)
+            predict = as.double(predict),
+            PACKAGE = "GrowingSOM"
   )
   
   training <- matrix(outc$currtrain, ncol=5)

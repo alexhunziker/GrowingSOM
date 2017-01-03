@@ -105,7 +105,8 @@ iris <- iris[,1:4]
 gsom_iris <- train.gsom(iris)
 
 # Some more Parameters
-gsom_iris <- train.gsom(iris, spreadFactor=0.95, keepdata=TRUE, iterations=30, alpha=0.5, gridsize = FALSE, nhood= "rect")
+gsom_iris <- train.gsom(iris, spreadFactor=0.8, keepdata=TRUE, iterations=30, 
+  alpha=0.5, gridsize = FALSE, nhood= "rect")
 
 # Fixed Grid size
 gsom_iris <- train.gsom(iris, iterations=30, gridsize = 10)

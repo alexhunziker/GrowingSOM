@@ -31,7 +31,8 @@ map.gsom <- function(gsom_object, df, retaindata=FALSE, ...){
             codes =as.double(as.matrix(gsom_object$nodes$codes)), 
             bmn = as.double(bmn),
             ndist = as.double(ndist),
-            freq = as.double(freq)
+            freq = as.double(freq),
+            PACKAGE = "GrowingSOM"
   )
   
   dist <- outc$ndist

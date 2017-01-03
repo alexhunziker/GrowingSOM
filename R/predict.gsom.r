@@ -29,7 +29,8 @@ predict.gsom <- function(object, df, retaindata=FALSE, ...){
             codes =as.double(as.matrix(object$nodes$codes)), 
             bmn = as.double(bmn),
             ndist = as.double(ndist),
-            freq = as.double(freq)
+            freq = as.double(freq),
+            PACKAGE = "GrowingSOM"
   )
   
   dist <- outc$ndist
