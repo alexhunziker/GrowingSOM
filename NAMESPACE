@@ -1,8 +1,14 @@
+importFrom("stats", "runif", "sd")
+import("graphics")
+
 export(train.gsom)
 export(train_xy.gsom)
 export(map.gsom)
 export(predict.gsom)
-export(plot.gsom)
-export(print.gsom)
-export(summary.gsom)
+
 useDynLib(GrowingSOM)
+
+S3method(plot, gsom)
+S3method(print, gsom)
+S3method(summary, gsom)
+S3method(predict, gsom)

@@ -1,6 +1,6 @@
 ////////////////////////////////////////
-//trainloop_xy.c - part of GSOM.r
-//Alex Hunziker - 17.10.2016
+//trainloop_xy.c - GrowingSOM
+//Alex Hunziker - 2017
 ////////////////////////////////////////
 
 #include <R.h>
@@ -27,21 +27,22 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 
 	//Convert pointers
 	int rep = *prep, lendf = *plendf, lennd = *plennd, dim = *pdim;
-	int lentn = *plentn, lentd = *plentd, lentr = *plentr, ydim = *pydim;
+	int lentn = *plentn, lentr = *plentr, ydim = *pydim;
 	double lrinit = *plrinit, initradius = *pradius;
 
 	//Declare variables
 	int nearest, totiter, phase, w1, w2, nind;
 	int i, j, k, l, m, n, o, p;
-	double min, max, meandist, adrate, q, minp, maxp;
+	double min, max, meandist, adrate, minp, maxp;
 	struct nodelist *nneigh, *nonneigh;
-	double dist, tmp, dm, lr, errorsum, radius;
+	double dist, tmp, dm, lr = 0.0, errorsum, radius;
 	int nodegrow, x, w=4;
-	struct nodelist *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
+	struct nodelist *root, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
 	double sr = *beta;
   
 	if((int)*leny != lendf) error("%d, %d, matrixes must have the same number of rows", (int)*leny, lendf);
 
+	//Switch neighbourhood condition array if a hexagonal structure is desired for the map
 	if(*hex==1){
 	  w=6;
 	  memcpy(ax, (double [6]){1.00, -1.00, 0.50, -0.50, 0.50, -0.50}, 6*sizeof(double));
@@ -73,13 +74,11 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			for(j = 0; j<lennd; j++) distnd[j] = 0;
 		}
 
-		// Reseting Learning rate during each iteration.
-		// It should be considered if this:
-		//  -Should be ommited for the growing phase
-		//  -The calculation of the learning rate from the traditional Kohonen should be used for
-		//   the phase 2.
+		// Reseting Learning rate during each iteration. (During growing phase.)
+		// During the smoothing phase the lr depreciation is as used in traditional kohonen maps
+		// Therefore resetting is not needed.
 		if(phase == 1) lr = lrinit;
-		//else lr = lrinit - (double)i/(double)rep*lrinit;
+		//else lr = lrinit - (double)i/(double)rep*lrinit;	// Alternative
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -89,12 +88,11 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			//Select Random observation
 			x = ((lendf-1) * unif_rand());
 
-			//Adjust learning Rate
-			//Use normal kohohnen lr for spreading phase
+			//Discount learning rate. Use formula suggested in the paper for growing phase,
+			//and the formula used for traditional kohonen in the smoothing phase
+			// (this seems necessary because otherwise the lr will be discounted to fast during phase 2)
 			if(phase==1) lr = *alpha * ( 1-(3.8/lennd))*lr;
-      else lr = 0.05-(0.05-0.01)*((double)i*(double)lendf+(double)j)/(double)totiter;
-			//else lr = lrinit - (double)i/(double)rep*lrinit;
-			//lr = *alpha * ( 1-(3.8/lennd))*lr;
+      			else lr = 0.05-(0.05-0.01)*((double)i*(double)lendf+(double)j)/(double)totiter;
 
 			// Find best matching node
 			nind = 0;
@@ -176,7 +174,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 				if(!(lentn-5 > lennd)) error("Number of nodes exceeded maximum capacity. Consider adjusting max gridsize or reducing Spreading Factor.");
 
 				//Determine the number of direct neighbours.
-				//This is kind of hacky...
+				//Crude implementation...
 				current = root;
 				tmp = 0;
 				while(current != NULL){
@@ -257,9 +255,6 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 								nonneigh = get_neighbours_xy(npos, lennd, lentn, newnode_f, 0, w);
 								clear_ll_xy(newnode_f);
 
-								//Sanity Check for debugging reasons
-								if(nneigh-> nodeid != nearest) error("Topology of the GSOM is broken...");
-
 								//Check the neighbours of nearest...
 								hptr = nonneigh;
 								tmp = -1;
@@ -275,8 +270,6 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 											free(hptr2);
 										} else {
 											prev -> next = NULL;
-											//free(hptr); #memory leak?
-											//hptr = NULL;
 										}
 									}
 
@@ -510,7 +503,7 @@ struct nodelist *get_neighbours_xy(double *npos, int lennd, int lentn, struct no
 
 }
 
-// House keeping, to avoid memory leaks.
+// Deletes the elements of a linked list
 void clear_ll_xy(struct nodelist *root){
   struct nodelist *tmp;
   while(root != NULL){

@@ -1,6 +1,6 @@
 ////////////////////////////////////////
-//map.c - part of GSOM.r
-//Alex Hunziker - 28.10.2016
+//map.c - GrowingSOM
+//Alex Hunziker - 2017
 ////////////////////////////////////////
 
 #include <R.h>

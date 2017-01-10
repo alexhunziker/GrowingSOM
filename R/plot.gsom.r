@@ -1,19 +1,16 @@
 #######################################
-#GSOM - Growing Self Organizing Maps
-#map.r
-#11/10/16 - Alex Hunziker
+# plot.gsom - GrowingSOM
+# Alex Hunziker - 2017
 #######################################
 
-# This function will plot the standard gsom plots, namely:
+# This S3 function will generate plots of GrowingSOM maps:
 #   -Count Frequency of nodes (count)
 #   -Distance within a node (distance)
-#   -Distance to neighbouring nodes (dist_neighbours)
-#   -Learning Process per Iteration (Average Mean Error) (training)
+#   -Distance to neighbouring nodes (dist_neighbours) #####To be implemented#####
+#   -Learning Process after each Iteration (training)
 #   -Plot of Properties (property)
-# Requires: a trained gsom model or mapped gsom data. Furthermore it requires
-#   the type of plot desired. For the property plot the dimension(s) to be 
-#   plotted can be indicated.
-# Returns: nothing
+
+# For the property plot the dimension(s) to be plotted can be indicated.
 
 plot.gsom <- function(x, type="count", colors=NULL, dim=0, main="", ...){
   

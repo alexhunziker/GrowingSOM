@@ -1,3 +1,9 @@
+#############################
+# print.gsom - GrowingSOM
+# Alex Hunziker - 2017
+#############################
+
+
 print.gsom <- function(x, ...){
   
   if(!is.null(x$mapped)){

@@ -1,3 +1,9 @@
+########################################################
+# This file originates from the package 'fields'
+# and has been slightly modified
+########################################################
+
+
 # fields  is a package for analysis of spatial data written for
 # the R software environment .
 # Copyright (C) 2016
@@ -21,11 +27,9 @@
 plot_scale <- function(..., add = FALSE,
                          breaks= NULL, nlevel = 64, col = NULL,  
                          horizontal = FALSE, legend.shrink = 0.9, legend.width = 1.2, 
-                         legend.mar = ifelse(horizontal, 3.1, 5.1), legend.lab = NULL,
-                         legend.line= 2,                    
+                         legend.lab = NULL, legend.line= 2,                    
                          graphics.reset = FALSE, bigplot = NULL, smallplot = NULL, lab.breaks = NULL,
-                         axis.args = NULL, legend.args = NULL, legend.cex=1.0, midpoint = FALSE, border = NA, 
-                         lwd = 1, verbose=FALSE) {
+                         axis.args = NULL, legend.args = NULL, legend.cex=1.0, midpoint = FALSE) {
   # Thanks to S. Koehler and  S. Woodhead
   # for comments on making this a better function
   #
@@ -39,9 +43,7 @@ plot_scale <- function(..., add = FALSE,
   info <- imagePlotInfo(..., breaks=breaks, nlevel=nlevel)
   # breaks have been computed if not passed in the call
   breaks<- info$breaks
-  if (is.null(legend.mar)) {
-    legend.mar <- ifelse(horizontal, 3.1, 5.1)
-  }
+  legend.mar <- 5.1
   # figure out how to divide up the plotting real estate 
   temp <- imageplot.setup(add = add, legend.shrink = legend.shrink, 
                           legend.width = legend.width, legend.mar = legend.mar, 

@@ -1,12 +1,10 @@
 #######################################
-#GSOM - Growing Self Organizing Maps
-#grow_xy
-#02/11/16 - Alex Hunziker
+# grow_xy.gsom - Growing SOM
+# Alex Hunziker - 2017
 #######################################
 
 # The Functions in this File are required in order to train the gsom model.
 # gsom.train() is the main function, which should be called by the user.
-# The performance intensive loop has been outsourced to C for performance reasons.
 
 #Mainly calls the C loop and processes returned data
 grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhood, grow, initrad){
@@ -17,6 +15,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhoo
   
   lrinit <- 0.9
 
+	# Define Neighbourhood Radius
   if(is.null(initrad)){
     if(grow==1) radius = 3  # Arbitrary default value
     else radius = sqrt(gridsize)
@@ -42,6 +41,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhoo
   
   npos <- matrix(0, nrow=lentn, ncol=2)
 
+	# Generate (initial) map
   if(nhood=="rect"){
     
     hex = 0
@@ -76,6 +76,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhoo
   as.integer(ncol(y))
   as.double(predict)
   
+	# Call C loop which trains the map
   outc = .C("som_train_loop_xy",
             df = as.double(df),
             codes = as.double(codes),
@@ -104,6 +105,7 @@ grow_xy.gsom <- function(y, df, repet, spreadFactor, alpha, beta, gridsize, nhoo
             PACKAGE = "GrowingSOM"
   )
   
+	# Process Results from C loop
   training <- matrix(outc$currtrain, ncol=5)
   training <- training[1:repet,]
   colnames(training) <- c("iteration", "training_stage", "meandist", "num_of_nodes", "nodegrowth")

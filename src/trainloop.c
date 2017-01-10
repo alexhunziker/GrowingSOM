@@ -1,6 +1,6 @@
 ////////////////////////////////////////
-//trainloop.c - part of GSOM.r
-//Alex Hunziker - 17.10.2016
+//trainloop.c - GrowingSOM
+//Alex Hunziker - 2017
 ////////////////////////////////////////
 
 #include <R.h>
@@ -33,19 +33,20 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 
 	//Convert pointers
 	int rep = *prep, lendf = *plendf, lennd = *plennd, dim = *pdim;
-	int lentn = *plentn, lentd = *plentd, lentr = *plentr;
+	int lentn = *plentn, lentr = *plentr;
 	double lrinit = *plrinit, initradius = *pradius;
 
 	//Declare variables
 	int nearest, totiter, phase, w1, w2, nind;
 	int i, j, k, l, m, n, o, p;
-	double min, max, meandist, adrate, q;
+	double min, max, meandist, adrate;
 	struct nodelist *nneigh, *nonneigh;
-	double dist, tmp, dm, lr, errorsum, radius;
+	double dist, tmp, dm, lr = 0.0, errorsum, radius;
 	int nodegrow, x, w=4;
-	struct nodelist *root, *tp, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
+	struct nodelist *root, *current, *tnode, *hptr, *hptr2, *newnode, *newnode_f, *prev;
 	double sr = *beta;
 
+	//Switch neighbourhood condition array if a hexagonal structure is desired for the map
 	if(*hex==1){
 	  w=6;
 	  memcpy(ax, (double [6]){1.00, -1.00, 0.50, -0.50, 0.50, -0.50}, 6*sizeof(double));
@@ -77,13 +78,11 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 			for(j = 0; j<lennd; j++) distnd[j] = 0;
 		}
 
-		// Reseting Learning rate during each iteration.
-		// It should be considered if this:
-		//  -Should be ommited for the growing phase
-		//  -The calculation of the learning rate from the traditional Kohonen should be used for
-		//   the phase 2.
+		// Reseting Learning rate during each iteration. (During growing phase.)
+		// During the smoothing phase the lr depreciation is as used in traditional kohonen maps
+		// Therefore resetting is not needed.
 		if(phase == 1) lr = lrinit;
-		//else lr = lrinit - (double)i/(double)rep*lrinit;
+		//else lr = lrinit - (double)i/(double)rep*lrinit;	//Alternative
 
 		// Loop over number of observations
 		for(j = 0; j<lendf; j++){
@@ -93,12 +92,11 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 			//Select Random observation
 			x = ((lendf-1) * unif_rand());
 
-			//Adjust learning Rate
-			//Use normal kohohnen lr for spreading phase
+			//Discount learning rate. Use formula suggested in the paper for growing phase,
+			//and the formula used for traditional kohonen in the smoothing phase
+			// (this seems necessary because otherwise the lr will be discounted to fast during phase 2)
 			if(phase==1) lr = *alpha * ( 1-(3.8/lennd))*lr;
 			else lr = 0.05 - (0.05-0.01)*(i*lendf+j)/totiter;
-			//else lr = lrinit - (double)i/(double)rep*lrinit;
-			//lr = *alpha * ( 1-(3.8/lennd))*lr;
 
 			// Find best matching node
 			nind = 0;
@@ -155,14 +153,14 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 
 			//Adjust neighbourhood
 			current = root;
-			//print_ll(current);
+
 			while(current != NULL){
 
 				for(k=0; k<dim; k++){
-					//printf("%d,%d,%d, %d: Adjusted %f (%f)", i, j, k, current -> nodeid, codes[current -> nodeid + k*lentn], df[x + k*lendf]);
+
 					codes[current -> nodeid + k*lentn] = codes[current -> nodeid+ k*lentn] +
 						(df[x + k*lendf] - codes[current -> nodeid+ k*lentn]) * lr * current -> adrate;
-					//printf(" to %f, with adrate %f lr %f\n", codes[current -> nodeid + k*lentn], current -> adrate, lr);
+
 				}
 
 				current = current -> next;
@@ -175,9 +173,10 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 				if(!(lentn-5 > lennd)) error("Number of nodes exceeded maximum capacity. Consider adjusting max gridsize or reducing Spreading Factor.");
 
 				//Determine the number of direct neighbours.
-				//This is kind of hacky...
+				//Crude implementation...
 				current = root;
 				tmp = 0;
+
 				while(current != NULL){
 					if(current -> adrate >= (initradius/(initradius+1.0)) ) tmp++;
 					current = current -> next;
@@ -193,7 +192,7 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 					for(l=1; l < w+1; l++){
 
 						current = current -> next;
-						// Paper suggests values between 0 and 1
+						// Paper suggests values between 0 and 1 for sr
 						distnd[current -> nodeid] = distnd[current -> nodeid] * (1 + sr);
 
 					}
@@ -253,9 +252,6 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 								nonneigh = get_neighbours(npos, lennd, lentn, newnode_f, 0, w);
 								clear_ll(newnode_f);
 
-								//Sanity Check for debugging reasons
-								if(nneigh-> nodeid != nearest) error("Topology of the GSOM is broken...");
-
 								//Check the neighbours of nearest...
 								hptr = nonneigh;
 								tmp = -1;
@@ -271,8 +267,6 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 											free(hptr2);
 										} else {
 											prev -> next = NULL;
-											//free(hptr); #memory leak?
-											//hptr = NULL;
 										}
 									}
 
@@ -402,17 +396,6 @@ void som_train_loop(double *df, double *codes, double *distnd, Sint *prep, Sint 
 			phase = 2;
 		}
 
-		/*printf("| ");
-		tmp = (double)i/(double)rep*20;
-		for(j=0; j!=20; j++){
-			if(tmp>0){
-				tmp--;
-				printf("-");
-			} else {
-				printf(" ");
-			}
-		}
-		printf(" |\n");*/
 		Rprintf(".");
 
 	}
@@ -493,7 +476,7 @@ struct nodelist *get_neighbours(double *npos, int lennd, int lentn, struct nodel
 }
 
 
-// House keeping, to avoid memory leaks.
+// Deleting all elements of a linked list
 void clear_ll(struct nodelist *root){
 	struct nodelist *tmp;
 	while(root != NULL){
@@ -504,7 +487,7 @@ void clear_ll(struct nodelist *root){
 	return;
 }
 
-//For debugging
+// Prints a linked list
 void print_ll(struct nodelist *root){
 	while(root != NULL){
 		Rprintf("NodeId = %d, Adrate=%f", root -> nodeid, root -> adrate);

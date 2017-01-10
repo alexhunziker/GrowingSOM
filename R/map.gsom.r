@@ -1,8 +1,7 @@
 #######################################
-#GSOM - Growing Self Organizing Maps
-#map.r
-#11/10/16 - Alex Hunziker
-#######################################
+# map.gsom - GrowingSOM
+# Alex Hunziker - 2017
+######################################
 
 # This Function maps new data onto a trained gsom_object without adjusting 
 # the gsom_object itself.

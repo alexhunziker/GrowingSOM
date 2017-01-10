@@ -3,11 +3,12 @@ Type: Package
 Title: Growing Self-Organizing Maps
 Version: 0.1
 Date: 2016-12-23
-Author: Alex Hunziker
-Maintainer: Alex Hunziker <alexhunziker@sunrise.ch>
+Authors@R: person("Hunziker", "Alex", role = c("aut", "cre"), email = "alexhunziker@sunrise.ch")
+Author: Hunziker Alex [aut, cre]
+Maintainer: Hunziker Alex <alexhunziker@sunrise.ch>
 Description: A growing self-organizing map (GrowingSOM, GSOM) is a growing variant of the popular self-organizing map (SOM).
     A growing self-organizing map is a type of artificial neural network (ANN) that is trained using unsupervised learning to produce a 
-    low-dimensional, discretized representation of the input space of the training samples, called a map. 
+    low-dimensional representation of the input space of the training samples, called a map. 
 Imports:
     plotrix
 License: GPL-3

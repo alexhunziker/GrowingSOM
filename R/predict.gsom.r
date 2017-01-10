@@ -1,8 +1,8 @@
-############
-#predict.r
-############
+################################
+# predict.gsom - GrowingSOM
+# Alex Hunziker - 2017
+################################
 
-# More pseudocode than anything else
 
 predict.gsom <- function(object, df, retaindata=FALSE, ...){
   
@@ -21,6 +21,7 @@ predict.gsom <- function(object, df, retaindata=FALSE, ...){
   ndist <- rep(0, times=nrow(df))
   freq <- rep(0, times=nrow(object$nodes$codes))
   
+  # Call the mapping function
   outc = .C("map_data",
             plendf = as.integer(nrow(df)),
             lennd = as.integer(nrow(object$nodes$codes)),
@@ -37,11 +38,11 @@ predict.gsom <- function(object, df, retaindata=FALSE, ...){
   bmn <- outc$bmn
   bmn = matrix(bmn, ncol= 1)
   
+  # Calculate the predicted values
   predict = data.frame(matrix(ncol=ncol(object$nodes$predict), nrow=nrow(df)))
   colnames(predict) = colnames(object$nodes$predict)
   for(i in (1:nrow(df))){
     predict[i,] = object$nodes$predict[bmn[i,1],]
-    #predict[i,] = tmp*(maxy-miny)+miny
   }
 
   cy = ncol(object$nodes$predict)

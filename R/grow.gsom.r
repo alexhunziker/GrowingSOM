@@ -1,12 +1,10 @@
 #######################################
-#GSOM - Growing Self Organizing Maps
-#train.r
-#26/10/16 - Alex Hunziker
+#grow.gsom.r - GrowingSOM
+#2017 - Alex Hunziker
 #######################################
 
 # The Functions in this File are required in order to train the gsom model.
-# gsom.train() is the main function, which should be called by the user.
-# The performance intensive loop has been outsourced to C for performance reasons.
+# train.gsom() is the main function, which should be called by the user.
 
 #Mainly calls the C loop and processes returned data
 grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize, nhood, grow, initrad){
@@ -19,8 +17,9 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
   
  initnodes <- gridsize*gridsize
 
+	# Define initial Radius
 	if(is.null(initrad)){
-		if(grow==1) radius = 3  # Arbitrary default value
+		if(grow==1) radius = 3  # default value
 		else radius = sqrt(gridsize)
 	} else{
 	  radius = initrad
@@ -37,14 +36,15 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
   gt = -ncol(df) * log(spreadFactor) * 0.01*nrow(df)
   
   npos <- matrix(0, nrow=lentn, ncol=2)
-  #npos[1:initnodes,] <- c(0, 1, 1, 0, 1, 0, 1, 0)
   
-  
+  # Generate the (initial) grid of nodes
   if(nhood=="rect"){
+
     hex = 0
     for(i in 1:gridsize){
       for(j in 1:gridsize) npos[gridsize*(i-1)+j,] = c(i, j)
     }
+
   }else{
     
     hex = 1
@@ -67,6 +67,7 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
   
   currtrain <- matrix(0, nrow=lentr, ncol=5)
   
+	# Call the C function that trains the map
   outc = .C("som_train_loop",
             df = as.double(df),
             codes = as.double(codes),
@@ -91,6 +92,8 @@ grow.gsom <- function(gsom_model, df, repet, spreadFactor, alpha, beta, gridsize
             PACKAGE = "GrowingSOM"
   )
   
+	# Process results from C
+
   training <- matrix(outc$currtrain, ncol=5)
   training <- training[1:repet,]
   colnames(training) <- c("iteration", "training_stage", "meandist", "num_of_nodes", "nodegrowth")

@@ -1,12 +1,9 @@
 #######################################
-#GSOM - Growing Self Organizing Maps
-#train.r
-#26/10/16 - Alex Hunziker
+# train.gsom - GrowingSOM
+# Alex Hunziker - 2017
 #######################################
 
 # The Functions in this File are required in order to train the gsom model.
-# gsom.train() is the main function, which should be called by the user.
-# The performance intensive loop has been outsourced to C for performance reasons.
 
 train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, alpha=0.9, beta=0.5, gridsize = FALSE, nhood= "rect", initrad = NULL, ...){
   
@@ -24,12 +21,10 @@ train.gsom <- function(data, spreadFactor=0.8, keepdata=FALSE, iterations=50, al
     stop("Grid size must be nummeric (for classical kohonen map) or FALSE (for Growing SOM).")
   }
 
-  t1 <- Sys.time()
+  # Call Function grow.gsom
   gsom_object <- grow.gsom(gsom_object, df, iterations, spreadFactor, alpha, beta, gridsize = gridsize, nhood=nhood, grow=grow, initrad = initrad)
-  t2 <- Sys.time()
-  print(t2-t1)
 
-	gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*sd+mean)}))
+  gsom_object$nodes$codes <- t(apply(gsom_object$nodes$codes, 1, function(x){(x*sd+mean)}))
   
   norm_param <- data.frame(mean = mean, sd = sd)
   gsom_object[["norm_param"]] <- norm_param

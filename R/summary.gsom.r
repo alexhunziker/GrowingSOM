@@ -1,15 +1,13 @@
 #######################################
-#GSOM - Growing Self Organizing Maps
-#summary.r
-#11/10/16 - Alex Hunziker
+# summary.gsom - GrowingSOM
+# Alex Hunziker - 2017
 #######################################
 
 # This function gives a (text) summary of a gsom_object
-# Requires: trained gsom_object
-# Returns: nothing
 
 summary.gsom <- function(object, ...){
   
+  # GSOM Maps
   if(!is.null(object$training)){
     
     # Information about of Training Dataset
@@ -35,6 +33,7 @@ summary.gsom <- function(object, ...){
     cat("Training data", sorstat, "stored in the model.\n")
     cat("Mean Distance to the closest unit in the map is:", distance, "(after", iterations, "iterations)\n")
   
+  # Observations that were mapped onto an existing GSOM map
   } else {
     
     if(!is.null(object$nodes$predict)){
