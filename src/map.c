@@ -30,7 +30,6 @@ void map_data(Sint *plendf, Sint *lennd, Sint *dim, double *df, double *codes, d
       dist = 0.0;
       for (l = 0; l < *dim; l++) {
         tmp = df[i + lendf*l] - codes[k + l * *lennd];
-        if(k==259) printf("%d, %d: %f, %f, %f\n", i, l, df[i + lendf*l], codes[k + l * *lennd], tmp);
         dist += tmp * tmp;
       }
 
