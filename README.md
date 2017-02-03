@@ -1,4 +1,4 @@
-# gsom_r
+# GrowingSOM
 Implementation of Growing Self Organizing Maps in R
 
 Mainly based on:
