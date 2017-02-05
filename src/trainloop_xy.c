@@ -45,12 +45,12 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 	//Switch neighbourhood condition array if a hexagonal structure is desired for the map
 	if(*hex==1){
 	  w=6;
-	  memcpy(ax, (double [6]){1.00, -1.00, 0.50, -0.50, 0.50, -0.50}, 6*sizeof(double));
-	  memcpy(ay, (double [6]){0.00, -0.00, 0.75, 0.75, -0.75, -0.75}, 6*sizeof(double));
+	  memcpy(ax, ((double [6]){1.00, -1.00, 0.50, -0.50, 0.50, -0.50}), 6*sizeof(double));
+	  memcpy(ay, ((double [6]){0.00, -0.00, 0.75, 0.75, -0.75, -0.75}), 6*sizeof(double));
 	} else {
 		w=4;
-		memcpy(ax, (double [6]){0.0, 0.0, 1.0, -1.0, 0.0, 0.0}, 6*sizeof(double));
-		memcpy(ay, (double [6]){1.0, -1.0, 0.0, 0.0, 0.0, 0.0}, 6*sizeof(double));
+		memcpy(ax, ((double [6]){0.0, 0.0, 1.0, -1.0, 0.0, 0.0}), 6*sizeof(double));
+		memcpy(ay, ((double [6]){1.0, -1.0, 0.0, 0.0, 0.0, 0.0}), 6*sizeof(double));
 	}
 
 	//Prepare LL
@@ -86,7 +86,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			R_CheckUserInterrupt();
 
 			//Select Random observation
-			x = ((lendf-1) * unif_rand());
+			x = (int)((lendf-1) * unif_rand());
 
 			//Discount learning rate. Use formula suggested in the paper for growing phase,
 			//and the formula used for traditional kohonen in the smoothing phase
@@ -141,7 +141,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			root -> adrate = 1;
 			root -> next = NULL;
 
-			for(n = radius; n >= 1; n--){
+			for(n = (int)radius; n >= 1; n--){
 
 				adrate = (double)n/(radius+1.0);
 				tnode = get_neighbours_xy(npos, lennd, lentn, root, adrate, w);
@@ -287,7 +287,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 								if(tmp != -1){
 
 									//Case A (Parent node w1 has a node w2 lying in the same direction as w1 lies in respect to new node)
-									w2 = tmp;
+									w2 = (int)tmp;
 									for(o=0; o < dim; o++){
 										if(codes[w1 + o*lentn] < codes[w2 + o*lentn]){
 											codes[lennd-1 + lentn*o] = codes[w1 + o*lentn]-(codes[w2 + o*lentn] - codes[w1 + o*lentn]);
