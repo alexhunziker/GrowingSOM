@@ -16,13 +16,15 @@ __Damminda Alahakoon, Saman K. Halgamuge (2000)__: Dynamic Self-Organizing Maps 
 
 ## Installation
 
-Make a R Package out of the folder gsom_pkg using the command:
+Make sure you are in the package directory then run:
 
 ```bash
-	R CMD build gsom-pkg
+	R CMD build .
 ```
 
-Windows may need a binary Package which can be obtained by:
+Please note that dependencies may need to be installed in advance (`install.packages("plotrix")`)
+
+Windows only: A binary Package needs to be obtained by: 
 
 ```bash
 	mkdir temp_location
@@ -31,12 +33,12 @@ Windows may need a binary Package which can be obtained by:
 
 installation Linux (in R):
 ```R
-	install.packages(repos=NULL,"GrowingSOM_0.1.tar.gz")
+	install.packages(repos=NULL,"PHATH_TO_HERE/GrowingSOM_VERSION.tar.gz")
 ```
 
 installation Windows (in R):
 ```R
-	install.packages(repos=NULL, "C:/Users/hunzikal/Downloads/NetCoS_1.0.zip", type="binary")
+	install.packages(repos=NULL, "PATH_TO_HERE\GrowingSOM_VERSION.zip", type="binary")
 ```
 
 ## Legal
