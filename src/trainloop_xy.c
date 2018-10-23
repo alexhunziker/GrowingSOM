@@ -128,7 +128,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 			if(nearest == -1) error("Critical: No best matching node found. This should not happen.");
 
 			//Update some counters
-			distnd[nearest] += sqrt(dm / (double)dim);
+			distnd[nearest] += sqrt(dm);
 			errorsum += dm;
 			freq[nearest]++;
 
@@ -383,7 +383,7 @@ void som_train_loop_xy(double *df, double *codes, double *distnd, Sint *prep, Si
 		//Iteration over DF (well the no of observations anyways) is completed
 
 		//Update Training Progress
-		meandist = sqrt(errorsum / dim) / lendf;
+		meandist = sqrt(errorsum) / lendf;
 		currtrain[i + 0*lentr] = i+1;
 		currtrain[i + 1*lentr] = phase;
 		currtrain[i + 2*lentr] = meandist;

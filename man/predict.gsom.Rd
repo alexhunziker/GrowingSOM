@@ -55,8 +55,7 @@
 }
 \note{
   Distance Measurement: The following Formula is used for determining the distance from the best matching unit: \cr
-  \code{sqrt((sum(df-code))^2 / Dimenstions)}\cr
-  This is a different scale than is used by the kohonen package.
+  \code{sqrt((sum(df-code))^2)}\cr
 }
 
 \seealso{
